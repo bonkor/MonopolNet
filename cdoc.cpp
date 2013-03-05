@@ -38,6 +38,41 @@ quint8 CDoc::getNextPlayer(int skip)
     return cp;
 }
 
+quint8 CDoc::playersAtPoleExept(quint8 pNu, quint8 pos)
+{
+    quint8 sum = 0;
+    for (quint8 i=0; i<nu_Players; i++)
+        if (i != pNu && m_p[pNu].active && m_p[pNu].pos == pos)
+            sum++;
+    return sum;
+}
+
+quint8 CDoc::playerOwnerCount(quint8 pNu)
+{
+    return m_p[pNu].hash.size();
+}
+
+quint8 CDoc::playerMonCount(quint8 pNu)
+{
+    return m_p[pNu].listMon.size();
+}
+
+CMoney CDoc::playerSumCount(quint8 pNu)
+{
+    CPlayer *p = &m_p[pNu];
+    CMoney sum = 0;
+
+    foreach (quint8 fn, p->hash.keys()) {
+        sum += p->hash.value(fn)->price;
+    }
+    return sum;
+}
+
+CMoney CDoc::playerCapital(quint8 pNu)
+{
+    return m_p[pNu].money + playerSumCount(pNu);
+}
+
 CFirm *CDoc::getFirm(quint8 fNu)
 {
     return &m_f[fNu];
