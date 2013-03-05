@@ -114,3 +114,18 @@ bool CDoc::inCrest(quint8 pos)
     else
         return false;
 }
+
+bool CDoc::setCurPlayer(int pNu)
+{
+    if (pNu >= nu_Players || ! m_p[pNu].active)
+        return false;
+
+    curPl = pNu;
+    return true;
+}
+
+void CDoc::clearLastPay(quint8 pNu)
+{
+    m_p[pNu].lastPay.clear();
+}
+
