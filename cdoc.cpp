@@ -1,8 +1,41 @@
 #include "cdoc.h"
 
+CDoc::CDoc(QObject *parent)
+{
+    nu_Players = 4;
+    curPl = 0;
+
+    nu_Monopols = 0;
+}
+
 CPlayer *CDoc::getCurPlayer(void)
 {
     return &m_p[curPl];
+}
+
+quint8 CDoc::getActivePlayers(void)
+{
+    quint8 sum = 0;
+    for (quint8 i=0; i<nu_Players; i++)
+        if (m_p[i].active)
+            sum++;
+    return sum;
+}
+
+quint8 CDoc::getNextPlayer(int skip)
+{
+    quint8 ap = getActivePlayers();
+    skip %= ap;
+
+    quint8 cp = curPl;
+    for (quint8 i=0; i<skip; i++) {
+        do {
+            cp++;
+            if (cp == nu_Players)
+                cp = 0;
+        } while (! m_p[cp].active);
+    }
+    return cp;
 }
 
 CFirm *CDoc::getFirm(quint8 fNu)
