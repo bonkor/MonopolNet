@@ -78,6 +78,79 @@ CFirm *CDoc::getFirm(quint8 fNu)
     return &m_f[fNu];
 }
 
+CMoney CDoc::giveToBank(quint8 pNu, CMoney sum)
+{
+    CPlayer *p = &m_p[pNu];
+    QString plName = p->name;
+
+    if (p->seq == 0) {
+        CMoney cap = playerCapital(pNu);
+        if (sum <= cap) {
+            p->money += sum;
+            emit sendLog(plName + tr(" платит ") + sum.toString());
+            return sum;
+        } else {
+            p->money += cap;
+            emit sendLog(plName + tr(" платит только ") + cap.toString());
+            sellAll(pNu);
+            p->active = false;
+            return cap;
+        }
+    } else {
+        emit sendLog(plName + tr(" не платит ") + sum.toString() + tr(" из-за секвестра"));
+        return sum;
+    }
+}
+
+void CDoc::takeFromBank(quint8 pNu, CMoney sum)
+{
+    CPlayer *p = &m_p[pNu];
+    QString plName = p->name;
+
+    if (p->seq == 0) {
+        p->money += sum;
+        emit sendLog(plName + tr(" получает ") + sum.toString());
+    } else
+        emit sendLog(plName + tr(" не получает ") + sum.toString() + tr(" из-за секвестра"));
+}
+
+CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
+{
+    CPlayer *fp = &m_p[fromPl];
+    CPlayer *tp = &m_p[toPl];
+    QString fromPlName = fp->name;
+    QString toPlName = tp->name;
+
+    if (fp->seq > 0) {
+        emit sendLog(fromPlName + tr(" не платит ") + toPlName + sum.toString() + tr(" из-за секвестра"));
+        return sum;
+    }
+    if (tp->seq > 0) {
+        emit sendLog(toPlName + tr(" не получает от ") + fromPlName + sum.toString() + tr(" из-за секвестра"));
+        return sum;
+    }
+
+    CMoney cap = playerCapital(fromPl);
+    if (sum <= cap) {
+        fp->money -= sum;
+        tp->money += sum;
+        emit sendLog(fromPlName + tr(" платит ") + toPlName + sum.toString());
+        return sum;
+    } else {
+        fp->money -= cap;
+        tp->money += cap;
+        emit sendLog(fromPlName + tr(" платит ")+ toPlName + tr(" только ") + cap.toString());
+        sellAll(fromPl);
+        fp->active = false;
+        return cap;
+    }
+}
+
+void CDoc::sellAll(quint8 pNu)
+{
+
+}
+
 quint8 CDoc::getDir(void)
 {
     CPlayer *p = &m_p[curPl];
