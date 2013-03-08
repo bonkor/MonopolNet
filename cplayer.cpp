@@ -9,6 +9,7 @@ CPlayer::CPlayer(QObject *parent) :
     active = true;
     stay = false;
     canBuy = false;
+    canInvest = false;
     crestDir = 0;   // невыбрано
     mustSellMode = false;
 

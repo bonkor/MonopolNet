@@ -94,6 +94,7 @@ CMoney CDoc::giveToBank(quint8 pNu, CMoney sum)
             emit sendLog(plName + tr(" платит только ") + cap.toString());
             sellAll(pNu);
             p->active = false;
+            emit sendLog(plName + tr(" выходит из игры"));
             return cap;
         }
     } else {
@@ -142,13 +143,18 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
         emit sendLog(fromPlName + tr(" платит ")+ toPlName + tr(" только ") + cap.toString());
         sellAll(fromPl);
         fp->active = false;
+        emit sendLog(fromPlName + tr(" выходит из игры"));
         return cap;
     }
 }
 
 void CDoc::sellAll(quint8 pNu)
 {
+    CPlayer *p = &m_p[pNu];
 
+    foreach (quint8 fn, p->hash.keys()) {
+        sellFirm(pNu, fn);
+    }
 }
 
 quint8 CDoc::getDir(void)
@@ -388,6 +394,10 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
 {
     CPlayer *p = &m_p[pNu];
     QString plName = p->name;
+
+    if (canTake(pNu, pos))
+        takeFirm(pNu, pos);
+
     quint8 oldPos = p->pos;
     quint8 newPos;
     if (pos == -1)
@@ -467,5 +477,99 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
         break;
     }
 
+    p->investComplit = false;
     return res;
+}
+
+bool CDoc::canBuy(quint8 player, quint8 fNu)
+{
+    CPlayer *p = &m_p[player];
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != 4)
+        return false;
+    if (playersAtPoleExept(player, fNu) != 0)
+        return false;
+    if (p->seq > 0)
+        return false;
+    if (p->pos != fNu && p->pos != 20 && ! p->canBuy)
+        return false;
+    if (p->money < f->price)
+        return false;
+    if (f->type == 1 && playerOwnerCount(player) == 0)
+        return false;
+    if (f->type == 2 && playerMonCount(player) == 0)
+        return false;
+
+    return true;
+}
+
+bool CDoc::canSell(quint8 player, quint8 fNu)
+{
+    CPlayer *p = &m_p[player];
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != player)
+        return false;
+    if (p->seq > 0)
+        return false;
+
+    return true;
+}
+
+bool CDoc::canInvest(quint8 player, quint8 fNu)
+{
+    CPlayer *p = &m_p[player];
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != player)
+        return false;
+    if (playersAtPoleExept(player, fNu) != 0)
+        return false;
+    if (p->seq > 0)
+        return false;
+    if (p->pos != fNu && ! p->canInvest)
+        return false;
+    CMezon *mz0 = &f->mz[0];
+    if (mz0->type == 3) {
+        if (p->money < mz0->invest)
+            return false;
+    } else {
+        if (f->cur_mz == f->m_nu)
+            return false;
+        CMezon *mz = &f->mz[f->cur_mz];
+        if (p->money < mz->invest)
+            return false;
+        if (mz->type == 1 && playerOwnerCount(player) == 0)
+            return false;
+        if (mz->type == 2 && playerMonCount(player) == 0)
+            return false;
+    }
+
+    return true;
+}
+
+bool CDoc::canTake(quint8 player, quint8 fNu)
+{
+    CPlayer *p = &m_p[player];
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != player)
+        return false;
+    if (p->pos != fNu)
+        return false;
+    if (p->seq > 0)
+        return false;
+    if (p->investComplit)
+        return false;
+
+    return true;
 }
