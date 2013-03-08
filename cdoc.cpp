@@ -2,6 +2,8 @@
 
 CDoc::CDoc(QObject *parent)
 {
+    FillFields();
+
     nu_Players = 4;
     curPl = 0;
 
@@ -717,4 +719,126 @@ bool CDoc::takeFirm(int owner, int fNu)
     emit sendLog(plName + tr(" получает ") + inc.toString() + tr(" с ") + fName);
 
     return true;
+}
+
+void CDoc::FillFields()
+{
+    for (quint8 i=0; i<57; i++) {
+        m_f[i].m_type = F_Firm;
+        m_f[i].type = 0;
+    }
+
+    m_f[0].m_type = F_3Ques;
+    m_f[3].m_type = F_Ques;
+    m_f[13].m_type = F_Ques;
+    m_f[23].m_type = F_Ques;
+    m_f[33].m_type = F_Ques;
+    m_f[8].m_type = F_Pip;
+    m_f[18].m_type = F_Pip;
+    m_f[28].m_type = F_Pip;
+    m_f[38].m_type = F_Pip;
+    m_f[10].m_type = F_Taxi;
+    m_f[20].m_type = F_Birga;
+    m_f[30].m_type = F_Turma;
+    m_f[44].m_type = F_Start;
+
+    m_f[1].name = tr("ESSO");
+    m_f[1].m_pict = P_NEF;
+    m_f[1].m_flag = F_USA;
+    m_f[1].price = 20;
+    m_f[1].binc = 2;
+    m_f[1].m_nu = 4;
+    m_f[1].mz[0].invest = 15;
+    m_f[1].mz[0].income = 6;
+    m_f[1].mz[1].invest = 30;
+    m_f[1].mz[1].income = 20;
+    m_f[1].mz[2].invest = 50;
+    m_f[1].mz[2].income = 30;
+    m_f[1].mz[3].invest = 35;
+    m_f[1].mz[3].income = 40;
+
+    m_f[2].name = tr("British Petrolium");
+    m_f[2].m_pict = P_NEF;
+    m_f[2].m_flag = F_ENG;
+    m_f[2].price = 25;
+    m_f[2].binc = 2.5;
+    m_f[2].m_nu = 4;
+    m_f[2].mz[0].invest = 20;
+    m_f[2].mz[0].income = 8;
+    m_f[2].mz[1].invest = 45;
+    m_f[2].mz[1].income = 25;
+    m_f[2].mz[2].invest = 50;
+    m_f[2].mz[2].income = 35;
+    m_f[2].mz[3].invest = 40;
+    m_f[2].mz[3].income = 55;
+
+    m_f[4].name = tr("Shell");
+    m_f[4].m_pict = P_NEF;
+    m_f[4].m_flag = F_HEL;
+    m_f[4].price = 30;
+    m_f[4].binc = 3;
+    m_f[4].m_nu = 4;
+    m_f[4].mz[0].invest = 25;
+    m_f[4].mz[0].income = 10;
+    m_f[4].mz[1].invest = 40;
+    m_f[4].mz[1].income = 30;
+    m_f[4].mz[2].invest = 60;
+    m_f[4].mz[2].income = 40;
+    m_f[4].mz[3].invest = 55;
+    m_f[4].mz[3].income = 60;
+
+    m_f[5].name = tr("Yokogama");
+    m_f[5].m_pict = P_POR;
+    m_f[5].m_flag = F_JAP;
+    m_f[5].price = 20;
+    m_f[5].binc = 5;
+    m_f[5].m_nu = 1;
+    m_f[5].mz[0].invest = 10;
+    m_f[5].mz[0].income = 10;
+
+    m_f[6].name = tr("Борба");
+    m_f[6].m_pict = P_RAD;
+    m_f[6].m_flag = F_BLK;
+    m_f[6].price = 25;
+    m_f[6].binc = 2.5;
+    m_f[6].m_nu = 4;
+    m_f[6].mz[0].invest = 13;
+    m_f[6].mz[0].income = 7;
+    m_f[6].mz[1].invest = 30;
+    m_f[6].mz[1].income = 25;
+    m_f[6].mz[2].invest = 40;
+    m_f[6].mz[2].income = 35;
+    m_f[6].mz[3].invest = 35;
+    m_f[6].mz[3].income = 50;
+
+    m_f[7].name = tr("BBC");
+    m_f[7].m_pict = P_RAD;
+    m_f[7].m_flag = F_ENG;
+    m_f[7].price = 30;
+    m_f[7].binc = 3;
+    m_f[7].m_nu = 4;
+    m_f[7].mz[0].invest = 17;
+    m_f[7].mz[0].income = 10;
+    m_f[7].mz[1].invest = 35;
+    m_f[7].mz[1].income = 25;
+    m_f[7].mz[2].invest = 50;
+    m_f[7].mz[2].income = 40;
+    m_f[7].mz[3].invest = 40;
+    m_f[7].mz[3].income = 60;
+
+    m_f[9].name = tr("Маяк");
+    m_f[9].m_pict = P_RAD;
+    m_f[9].m_flag = F_URS;
+    m_f[9].price = 35;
+    m_f[9].binc = 3.5;
+    m_f[9].m_nu = 4;
+    m_f[9].mz[0].invest = 21;
+    m_f[9].mz[0].income = 16;
+    m_f[9].mz[1].invest = 40;
+    m_f[9].mz[1].income = 35;
+    m_f[9].mz[2].invest = 60;
+    m_f[9].mz[2].income = 45;
+    m_f[9].mz[3].invest = 55;
+    m_f[9].mz[3].income = 70;
+
 }

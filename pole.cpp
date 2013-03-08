@@ -13,6 +13,7 @@ CMezon::CMezon(QObject *parent)
 CFirm::CFirm(CField *parent)
 {
     owner = 4;
+    cur_mz = 0;
 }
 
 CMonopol::CMonopol(QObject *parent)
