@@ -129,3 +129,7 @@ void CDoc::clearLastPay(quint8 pNu)
     m_p[pNu].lastPay.clear();
 }
 
+quint8 CDoc::calculateNextPos(quint8 pNu, quint8 st)
+{
+
+}
