@@ -573,3 +573,148 @@ bool CDoc::canTake(quint8 player, quint8 fNu)
 
     return true;
 }
+
+bool CDoc::buyFirm(int newOwner, int fNu, int flNu)
+{
+    CPlayer *p = &m_p[newOwner];
+    CFirm *f = &m_f[fNu];
+    QString plName = p->name;
+    QString fName = f->name;
+
+    if (! canBuy(newOwner, fNu)) {
+        emit sendLog(plName + tr(" не может купить ") + fName);
+        return false;
+    }
+    if (f->type == 1 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != newOwner)) {
+        emit sendLog(plName + tr(" не может купить ") + fName);
+        return false;
+    }
+    if (f->type == 2 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != newOwner || m_f[flNu].GetMultiplicator() == 1)) {
+        emit sendLog(plName + tr(" не может купить ") + fName);
+        return false;
+    }
+
+    p->money -= f->price;
+    f->owner = newOwner;
+    p->investComplit = true;
+    if (f->type == 1 || f->type == 2) {
+        loseFirm(newOwner, flNu);
+        emit sendLog(plName + tr(" покупает ") + fName + tr(" и отказывается от ") + m_f[flNu].name);
+    } else
+        emit sendLog(plName + tr(" покупает ") + fName);
+
+    foreach (CMonopol *mn, f->listMon) {
+        bool res = true;
+        foreach (CFirm *fm, mn->list) {
+            if (fm->owner != newOwner)
+                res = false;
+        }
+        if (res) {
+            mn->owner = newOwner;
+            p->listMon.append(mn);
+            emit sendLog(plName + tr(" приобретает контроль над монополией ") + mn->name);
+        }
+    }
+    return true;
+}
+
+bool CDoc::sellFirm(int oldOwner, int fNu)
+{
+    CPlayer *p = &m_p[oldOwner];
+    CFirm *f = &m_f[fNu];
+    QString plName = p->name;
+    QString fName = f->name;
+
+    if (! canSell(oldOwner, fNu)) {
+        emit sendLog(plName + tr(" не может продать ") + fName);
+        return false;
+    }
+
+    p->money += f->price;
+    loseFirm(oldOwner, fNu);
+    emit sendLog(plName + tr(" продает ") + fName);
+
+    return true;
+}
+
+bool CDoc::loseFirm(int oldOwner, int fNu)
+{
+    CPlayer *p = &m_p[oldOwner];
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != oldOwner)
+        return false;
+
+    f->owner = 4;
+
+    foreach (CMonopol *mn, f->listMon) {
+        if (mn->owner == oldOwner) {
+            mn->owner = 4;
+            p->listMon.removeAll(mn);
+            emit sendLog(p->name + tr(" теряет контроль над монополией ") + mn->name);
+        }
+    }
+    return true;
+}
+
+bool CDoc::investFirm(int owner, int fNu, int flNu)
+{
+    CPlayer *p = &m_p[owner];
+    CFirm *f = &m_f[fNu];
+    QString plName = p->name;
+    QString fName = f->name;
+
+    if (! canInvest(owner, fNu)) {
+        emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
+        return false;
+    }
+
+    CMezon *mz0 = &f->mz[0];
+    if (mz0->type == 3) {
+        p->money -= mz0->invest;
+        f->cur_mz++;
+        p->investComplit = true;
+        emit sendLog(plName + tr(" не ставит мезон на ") + fName + tr(" за ") + mz0->invest.toString());
+    } else {
+        CMezon *mz = &f->mz[f->cur_mz];
+        if (f->type == 1 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner)) {
+            emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
+            return false;
+        }
+        if (f->type == 2 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner || m_f[flNu].GetMultiplicator() == 1)) {
+            emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
+            return false;
+        }
+        p->money -= mz->invest;
+        f->cur_mz++;
+        p->investComplit = true;
+        if (mz->type == 1 || mz->type == 2) {
+            loseFirm(owner, flNu);
+            emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" за ") + mz->invest.toString() + tr(" и отказывается от ") + m_f[flNu].name);
+        } else
+            emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" за ") + mz->invest.toString());
+    }
+    return true;
+}
+
+bool CDoc::takeFirm(int owner, int fNu)
+{
+    CPlayer *p = &m_p[owner];
+    CFirm *f = &m_f[fNu];
+    QString plName = p->name;
+    QString fName = f->name;
+
+    if (! canTake(owner, fNu)) {
+        emit sendLog(plName + tr(" не может получить деньги с ") + fName);
+        return false;
+    }
+
+    CMoney inc = f->GetCurIncome();
+    p->money += inc;
+    p->investComplit = true;
+    emit sendLog(plName + tr(" получает ") + inc.toString() + tr(" с ") + fName);
+
+    return true;
+}
