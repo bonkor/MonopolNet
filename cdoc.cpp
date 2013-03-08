@@ -296,3 +296,103 @@ quint8 CDoc::calculateNextPos(quint8 pNu, quint8 st)
 
     return curPos;
 }
+
+bool CDoc::plusStart(quint8 oldPos, quint8 newPos)
+{
+    if (! inCrest(newPos)) return false;
+    if (((newPos >= 44) && (newPos <= 48) || (newPos == 15)) &&
+        (((oldPos < 44) && (oldPos >= 40)) || ((oldPos >= 34) && (oldPos <= 36)))) return true;
+    if (((newPos <= 44) && (newPos >= 40) || (newPos == 35)) &&
+        (((oldPos > 44) && (oldPos <= 48)) || ((oldPos >= 14) && (oldPos <= 16)))) return true;
+    if (((newPos >= 53) && (newPos <= 56) || (newPos == 25) || (newPos == 44)) &&
+        (((oldPos <= 52) && (oldPos >= 49)) || ((oldPos >= 4) && (oldPos <= 6)))) return true;
+    if (((newPos <= 52) && (newPos >= 49) || (newPos == 5) || (newPos == 44)) &&
+        (((oldPos >= 53) && (oldPos <= 56)) || ((oldPos >= 24) && (oldPos <= 26)))) return true;
+    return false;
+}
+
+bool CDoc::go(quint8 pNu, quint8 st, int pos)
+{
+    CPlayer *p = &m_p[pNu];
+    QString plName = p->name;
+    quint8 oldPos = p->pos;
+    quint8 newPos;
+    if (pos == -1)
+        newPos = calculateNextPos(pNu, st);
+    else
+        newPos = pos;
+
+    CFirm *f = &m_f[newPos];
+    quint8 t = f->m_type;
+
+    if (plusStart(oldPos, newPos)) {
+        if (p->seq == 0) {
+            emit sendLog(plName + tr(" получает 25 за проход через СТАРТ"));
+            takeFromBank(pNu, 25);
+        } else {
+            emit sendLog(plName + tr(" не получает 25 за проход через СТАРТ из-за секвестра"));
+        }
+    }
+
+    bool res = true;
+    switch (t) {
+    case F_Firm:
+        {
+            QString fName = f->name;
+            if (pos == -1 && st == 0)
+                emit sendLog(plName + tr(" остается на ") + fName);
+            else
+                emit sendLog(plName + tr(" идет на ") + fName);
+            quint8 ow = f->owner;
+            if (ow != 4 && ow != pNu) {
+                CMoney inc = f->GetCurIncome();
+                if (transferMoney(pNu, ow, inc) != inc)
+                    res = false;
+            }
+        }
+        break;
+    case F_3Ques:
+        if (pos == -1 && st == 0)
+            emit sendLog(plName + tr(" остается на Вопросах"));
+        else
+            emit sendLog(plName + tr(" идет на Вопросы"));
+        break;
+    case F_Ques:
+        if (pos == -1 && st == 0)
+            emit sendLog(plName + tr(" остается на вопросе"));
+        else
+            emit sendLog(plName + tr(" идет на вопрос"));
+        break;
+    case F_Birga:
+        if (pos == -1 && st == 0)
+            emit sendLog(plName + tr(" остается на Бирже"));
+        else
+            emit sendLog(plName + tr(" идет на Биржу"));
+        if (giveToBank(pNu, 10) != 10)
+            res = false;
+        break;
+    case F_Pip:
+        if (pos == -1 && st == 0)
+            emit sendLog(plName + tr(" остается на пипке"));
+        else
+            emit sendLog(plName + tr(" идет на пипку"));
+        break;
+    case F_Taxi:
+        if (pos == -1 && st == 0)
+            emit sendLog(plName + tr(" остается в Такси"));
+        else
+            emit sendLog(plName + tr(" идет в Такси"));
+            p->stay = true;
+        p->stay = true;
+        break;
+    case F_Turma:
+        if (pos == -1 && st == 0)
+            emit sendLog(plName + tr(" остается в Тюрьме"));
+        else
+            emit sendLog(plName + tr(" садится в Тюрьму"));
+        p->stay = true;
+        break;
+    }
+
+    return res;
+}
