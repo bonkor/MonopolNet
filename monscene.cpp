@@ -342,6 +342,10 @@ QRect MonScene::GetFieldRect(int pos)
 
 void MonScene::showPlayers(void)
 {
+    for (quint8 i=0; i<doc->nu_Players; i++)
+        if (! doc->m_p[i].active)
+            pl[i]->hide();
+
     QHash<int,int> hash;
     for (int i=0; i<doc->getActivePlayers(); i++) {
         quint8 cp = doc->getNextPlayer(i);

@@ -94,13 +94,14 @@ void CControl::trySellFirm(int pl, int fNu)
 {
     doc.clearLastPay(pl);
     if (doc.sellFirm(pl, fNu)) {
-//        emit sendToLog(doc.m_p[pl].name + tr(" продает ") + doc.m_f[fNu].name);
+        emit sendToLog(doc.m_p[pl].name + tr(" продает ") + doc.m_f[fNu].name);
         emit docFirmChanged(fNu);
     } else {
-//        emit sendToLog(doc.m_p[pl].name + tr(" не удается продать ") + doc.m_f[fNu].name);
+        emit sendToLog(doc.m_p[pl].name + tr(" не удается продать ") + doc.m_f[fNu].name);
     }
     CPlayer *plp = &doc.m_p[pl];
     if (plp->mustSellMode && plp->money.positive()) {
+        qDebug() << pl << "-" << plp->money.toString();
         plp->mustSellMode = false;
         startMove();
     }
@@ -395,7 +396,7 @@ void CControl::startMove(void)
 {
     CPlayer *cplp = doc.getCurPlayer();
 
-    if (cplp->money < 0) {
+    if (! cplp->money.positive()) {
         emit askSellSomething(doc.curPl);
         return;
     }

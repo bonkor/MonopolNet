@@ -2,12 +2,11 @@
 
 CDoc::CDoc(QObject *parent)
 {
-    FillFields();
-
     nu_Players = 4;
     curPl = 0;
 
     nu_Monopols = 28;
+    FillFields();
 }
 
 CPlayer *CDoc::getCurPlayer(void)
@@ -88,8 +87,10 @@ CMoney CDoc::giveToBank(quint8 pNu, CMoney sum)
     if (p->seq == 0) {
         CMoney cap = playerCapital(pNu);
         if (sum <= cap) {
-            p->money += sum;
+            p->money -= sum;
             emit sendLog(plName + tr(" платит ") + sum.toString());
+            if (! p->money.positive())
+                p->mustSellMode = true;
             return sum;
         } else {
             p->money += cap;
@@ -138,6 +139,8 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
         fp->money -= sum;
         tp->money += sum;
         emit sendLog(fromPlName + tr(" платит ") + toPlName + tr(" ") + sum.toString());
+        if (! fp->money.positive())
+            fp->mustSellMode = true;
         return sum;
     } else {
         fp->money -= cap;
@@ -408,7 +411,9 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     else
         newPos = pos;
 
+    qDebug() << "go" << pNu << "-" << st << "-" << pos << " || " << oldPos << "-" << newPos;
     p->pos = newPos;
+    p->stay = false;
 
     switch (newPos) {
     case 5:
@@ -489,7 +494,6 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
             emit sendLog(plName + tr(" остается в Такси"));
         else
             emit sendLog(plName + tr(" идет в Такси"));
-            p->stay = true;
         p->stay = true;
         break;
     case F_Turma:
@@ -498,6 +502,12 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
         else
             emit sendLog(plName + tr(" садится в Тюрьму"));
         p->stay = true;
+        break;
+    case F_Start:
+        if (pos == -1 && st == 0)
+            emit sendLog(plName + tr(" остается на СТАРТе"));
+        else
+            emit sendLog(plName + tr(" идет на СТАРТ"));
         break;
     }
 
@@ -636,6 +646,7 @@ bool CDoc::buyFirm(int newOwner, int fNu, int flNu)
     foreach (CMonopol *mn, f->listMon) {
         bool res = true;
         foreach (CFirm *fm, mn->list) {
+            qDebug() << mn->name << fm->name <<fm->owner << newOwner << res;
             if (fm->owner != newOwner)
                 res = false;
         }
@@ -678,6 +689,7 @@ bool CDoc::loseFirm(int oldOwner, int fNu)
         return false;
 
     f->owner = 4;
+    f->cur_mz = 0;
 
     p->hash.remove(fNu);
 
@@ -711,11 +723,11 @@ bool CDoc::investFirm(int owner, int fNu, int flNu)
         emit sendLog(plName + tr(" не ставит мезон на ") + fName + tr(" за ") + mz0->invest.toString());
     } else {
         CMezon *mz = &f->mz[f->cur_mz];
-        if (f->type == 1 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner)) {
+        if (mz->type == 1 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner)) {
             emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
             return false;
         }
-        if (f->type == 2 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner || m_f[flNu].GetMultiplicator() == 1)) {
+        if (mz->type == 2 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner || m_f[flNu].GetMultiplicator() == 1)) {
             emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
             return false;
         }
