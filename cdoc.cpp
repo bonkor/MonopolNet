@@ -415,6 +415,25 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     p->pos = newPos;
     p->stay = false;
 
+    if (p->stepsBack == 1) {
+        switch (p->crestDir) {
+        case D_Down:
+            p->crestDir = D_Up;
+            break;
+        case D_Up:
+            p->crestDir = D_Down;
+            break;
+        case D_Left:
+            p->crestDir = D_Right;
+            break;
+        case D_Right:
+            p->crestDir = D_Left;
+            break;
+        }
+    }
+    if (p->stepsBack > 0)
+        p->stepsBack--;
+
     switch (newPos) {
     case 5:
         p->crestDir = D_Down;

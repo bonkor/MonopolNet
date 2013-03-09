@@ -158,8 +158,8 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-//    pair.first = 6; pair.second = 3;
-    pair.first = 4; pair.second = 1;
+    pair.first = 6; pair.second = 3;
+//    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
         return;

@@ -22,8 +22,8 @@ CPlayer::CPlayer(QObject *parent) :
 void CPlayer::addMove(int mv)
 {
     if (mv < 0)
-        stepsBack += mv;
-    for (int i=0; i<mv; i++)
+        stepsBack -= mv;
+    for (int i=0; i<abs(mv); i++)
         queue << Q_Move;
 }
 
