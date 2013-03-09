@@ -1371,4 +1371,166 @@ void CDoc::FillFields()
     m_f[56].mz[2].income = 60;
     m_f[56].mz[3].invest = 80;
     m_f[56].mz[3].income = 80;
+
+    m_m[0].name = tr("Нефтяные компании");
+    m_m[0].list.append(&m_f[1]);
+    m_m[0].list.append(&m_f[2]);
+    m_m[0].list.append(&m_f[4]);
+
+    m_m[1].name = tr("Радиостанции");
+    m_m[1].list.append(&m_f[6]);
+    m_m[1].list.append(&m_f[7]);
+    m_m[1].list.append(&m_f[9]);
+
+    m_m[2].name = tr("Продукты");
+    m_m[2].list.append(&m_f[11]);
+    m_m[2].list.append(&m_f[12]);
+    m_m[2].list.append(&m_f[14]);
+
+    m_m[3].name = tr("Авиакомпании");
+    m_m[3].list.append(&m_f[16]);
+    m_m[3].list.append(&m_f[17]);
+    m_m[3].list.append(&m_f[19]);
+
+    m_m[4].name = tr("Электроника");
+    m_m[4].list.append(&m_f[21]);
+    m_m[4].list.append(&m_f[22]);
+    m_m[4].list.append(&m_f[24]);
+
+    m_m[5].name = tr("Разведка");
+    m_m[5].list.append(&m_f[26]);
+    m_m[5].list.append(&m_f[27]);
+    m_m[5].list.append(&m_f[29]);
+
+    m_m[6].name = tr("Киностудии");
+    m_m[6].list.append(&m_f[31]);
+    m_m[6].list.append(&m_f[32]);
+    m_m[6].list.append(&m_f[34]);
+
+    m_m[7].name = tr("Информагентства");
+    m_m[7].list.append(&m_f[36]);
+    m_m[7].list.append(&m_f[37]);
+    m_m[7].list.append(&m_f[39]);
+
+    m_m[8].name = tr("Пресса");
+    m_m[8].list.append(&m_f[54]);
+    m_m[8].list.append(&m_f[42]);
+    m_m[8].list.append(&m_f[53]);
+    m_m[8].list.append(&m_f[49]);
+
+    m_m[9].name = tr("Автоконцерны");
+    m_m[9].list.append(&m_f[45]);
+    m_m[9].list.append(&m_f[55]);
+    m_m[9].list.append(&m_f[48]);
+    m_m[9].list.append(&m_f[40]);
+    m_m[9].list.append(&m_f[46]);
+    m_m[9].list.append(&m_f[52]);
+
+    m_m[10].name = tr("Туризм");
+    m_m[10].list.append(&m_f[51]);
+    m_m[10].list.append(&m_f[41]);
+    m_m[10].list.append(&m_f[56]);
+
+    m_m[11].name = tr("Курорты");
+    m_m[11].list.append(&m_f[47]);
+    m_m[11].list.append(&m_f[50]);
+    m_m[11].list.append(&m_f[43]);
+
+    m_m[12].name = tr("HLV");
+    m_m[12].list.append(&m_f[50]);
+    m_m[12].list.append(&m_f[42]);
+    m_m[12].list.append(&m_f[21]);
+
+    m_m[13].name = tr("USA ind");
+    m_m[13].list.append(&m_f[1]);
+    m_m[13].list.append(&m_f[12]);
+    m_m[13].list.append(&m_f[24]);
+
+    m_m[14].name = tr("USA id");
+    m_m[14].list.append(&m_f[29]);
+    m_m[14].list.append(&m_f[34]);
+    m_m[14].list.append(&m_f[54]);
+
+    m_m[15].name = tr("USA");
+    m_m[15].list.append(&m_f[1]);
+    m_m[15].list.append(&m_f[12]);
+    m_m[15].list.append(&m_f[24]);
+    m_m[15].list.append(&m_f[29]);
+    m_m[15].list.append(&m_f[34]);
+    m_m[15].list.append(&m_f[54]);
+
+    m_m[16].name = tr("DDR");
+    m_m[16].list.append(&m_f[15]);
+    m_m[16].list.append(&m_f[41]);
+    m_m[16].list.append(&m_f[32]);
+
+    m_m[17].name = tr("BRD");
+    m_m[17].list.append(&m_f[17]);
+    m_m[17].list.append(&m_f[46]);
+    m_m[17].list.append(&m_f[22]);
+
+    m_m[18].name = tr("Germany");
+    m_m[18].list.append(&m_f[15]);
+    m_m[18].list.append(&m_f[41]);
+    m_m[18].list.append(&m_f[32]);
+    m_m[18].list.append(&m_f[17]);
+    m_m[18].list.append(&m_f[46]);
+    m_m[18].list.append(&m_f[22]);
+
+    m_m[19].name = tr("ENG");
+    m_m[19].list.append(&m_f[7]);
+    m_m[19].list.append(&m_f[16]);
+    m_m[19].list.append(&m_f[27]);
+    m_m[19].list.append(&m_f[2]);
+    m_m[19].list.append(&m_f[37]);
+
+    m_m[20].name = tr("FRA");
+    m_m[20].list.append(&m_f[19]);
+    m_m[20].list.append(&m_f[55]);
+    m_m[20].list.append(&m_f[47]);
+    m_m[20].list.append(&m_f[39]);
+    m_m[20].list.append(&m_f[26]);
+
+    m_m[21].name = tr("JAP");
+    m_m[21].list.append(&m_f[40]);
+    m_m[21].list.append(&m_f[5]);
+    m_m[21].list.append(&m_f[51]);
+
+    m_m[22].name = tr("ITA");
+    m_m[22].list.append(&m_f[35]);
+    m_m[22].list.append(&m_f[56]);
+    m_m[22].list.append(&m_f[53]);
+    m_m[22].list.append(&m_f[48]);
+
+    m_m[23].name = tr("BLK");
+    m_m[23].list.append(&m_f[6]);
+    m_m[23].list.append(&m_f[36]);
+    m_m[23].list.append(&m_f[11]);
+
+    m_m[24].name = tr("HEL");
+    m_m[24].list.append(&m_f[25]);
+    m_m[24].list.append(&m_f[4]);
+
+    m_m[25].name = tr("HUN");
+    m_m[25].list.append(&m_f[45]);
+    m_m[25].list.append(&m_f[14]);
+
+    m_m[26].name = tr("RUS");
+    m_m[26].list.append(&m_f[9]);
+    m_m[26].list.append(&m_f[31]);
+    m_m[26].list.append(&m_f[52]);
+    m_m[26].list.append(&m_f[49]);
+    m_m[26].list.append(&m_f[43]);
+
+    m_m[27].name = tr("Порты");
+    m_m[27].list.append(&m_f[5]);
+    m_m[27].list.append(&m_f[15]);
+    m_m[27].list.append(&m_f[25]);
+    m_m[27].list.append(&m_f[35]);
+
+    for (quint8 i=0; i<28; i++) {
+        foreach (CFirm *f, m_m[i].list) {
+            f->listMon.append(&m_m[i]);
+        }
+    }
 }
