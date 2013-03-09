@@ -55,7 +55,7 @@ void CControl::tryInvestFirm(int pl, int fNu, int flNu)
             emit docChanged();
         }
     } else {
-        emit sendToLog(doc.m_p[pl].name + tr(" не удается промезонировать ") + doc.m_f[fNu].name);
+//        emit sendToLog(doc.m_p[pl].name + tr(" не удается промезонировать ") + doc.m_f[fNu].name);
     }
 }
 
@@ -75,10 +75,10 @@ void CControl::tryBuyFirm(int pl, int fNu, int flNu)
 {
     doc.clearLastPay(pl);
     QString s;
-    if (flNu != 0)
-        s = tr(" и отказывается от ") + doc.m_f[flNu].name;
+//    if (flNu != 0)
+//        s = tr(" и отказывается от ") + doc.m_f[flNu].name;
     if (doc.buyFirm(pl, fNu, flNu)) {
-        emit sendToLog(doc.m_p[pl].name + tr(" покупает ") + doc.m_f[fNu].name + s);
+//        emit sendToLog(doc.m_p[pl].name + tr(" покупает ") + doc.m_f[fNu].name + s);
         if (flNu == 0)
             emit docFirmChanged(fNu);
         else {
@@ -86,7 +86,7 @@ void CControl::tryBuyFirm(int pl, int fNu, int flNu)
             emit docChanged();
         }
     } else {
-        emit sendToLog(doc.m_p[pl].name + tr(" не удается купить ") + doc.m_f[fNu].name);
+//        emit sendToLog(doc.m_p[pl].name + tr(" не удается купить ") + doc.m_f[fNu].name);
     }
 }
 
@@ -94,10 +94,10 @@ void CControl::trySellFirm(int pl, int fNu)
 {
     doc.clearLastPay(pl);
     if (doc.sellFirm(pl, fNu)) {
-        emit sendToLog(doc.m_p[pl].name + tr(" продает ") + doc.m_f[fNu].name);
+//        emit sendToLog(doc.m_p[pl].name + tr(" продает ") + doc.m_f[fNu].name);
         emit docFirmChanged(fNu);
     } else {
-        emit sendToLog(doc.m_p[pl].name + tr(" не удается продать ") + doc.m_f[fNu].name);
+//        emit sendToLog(doc.m_p[pl].name + tr(" не удается продать ") + doc.m_f[fNu].name);
     }
     CPlayer *plp = &doc.m_p[pl];
     if (plp->mustSellMode && plp->money.positive()) {
@@ -293,7 +293,7 @@ void CControl::replayStay(int dir)
             startMove();
         } else {
             cplp->stay = false;
-            doc.giveToBank(doc.curPl, 10.);
+            doc.giveToBank(doc.curPl, 10);
             emit sendToLog(cplp->name + tr(" выкупается из ") + s + tr(" за 10"));
             cplp->addMove(1);
             emit docInfoChanged();

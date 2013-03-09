@@ -7,7 +7,7 @@ CDoc::CDoc(QObject *parent)
     nu_Players = 4;
     curPl = 0;
 
-    nu_Monopols = 0;
+    nu_Monopols = 28;
 }
 
 CPlayer *CDoc::getCurPlayer(void)
@@ -44,7 +44,7 @@ quint8 CDoc::playersAtPoleExept(quint8 pNu, quint8 pos)
 {
     quint8 sum = 0;
     for (quint8 i=0; i<nu_Players; i++)
-        if (i != pNu && m_p[pNu].active && m_p[pNu].pos == pos)
+        if (i != pNu && m_p[i].active && m_p[i].pos == pos)
             sum++;
     return sum;
 }
@@ -129,7 +129,7 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
         return sum;
     }
     if (tp->seq > 0) {
-        emit sendLog(toPlName + tr(" не получает от ") + fromPlName + sum.toString() + tr(" из-за секвестра"));
+        emit sendLog(toPlName + tr(" не получает от ") + fromPlName + tr(" ") + sum.toString() + tr(" из-за секвестра"));
         return sum;
     }
 
@@ -137,7 +137,7 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
     if (sum <= cap) {
         fp->money -= sum;
         tp->money += sum;
-        emit sendLog(fromPlName + tr(" платит ") + toPlName + sum.toString());
+        emit sendLog(fromPlName + tr(" платит ") + toPlName + tr(" ") + sum.toString());
         return sum;
     } else {
         fp->money -= cap;
@@ -381,6 +381,7 @@ quint8 CDoc::calculateNextPos(quint8 pNu, quint8 st)
 bool CDoc::plusStart(quint8 oldPos, quint8 newPos)
 {
     if (! inCrest(newPos)) return false;
+    if (newPos == 44) return true;
     if (((newPos >= 44) && (newPos <= 48) || (newPos == 15)) &&
         (((oldPos < 44) && (oldPos >= 40)) || ((oldPos >= 34) && (oldPos <= 36)))) return true;
     if (((newPos <= 44) && (newPos >= 40) || (newPos == 35)) &&
@@ -397,8 +398,8 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     CPlayer *p = &m_p[pNu];
     QString plName = p->name;
 
-    if (canTake(pNu, pos))
-        takeFirm(pNu, pos);
+//    if (canTake(pNu, pos))
+//        takeFirm(pNu, pos);
 
     quint8 oldPos = p->pos;
     quint8 newPos;
@@ -407,13 +408,34 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     else
         newPos = pos;
 
+    p->pos = newPos;
+
+    switch (newPos) {
+    case 5:
+        p->crestDir = D_Down;
+        break;
+    case 15:
+        p->crestDir = D_Left;
+        break;
+    case 25:
+        p->crestDir = D_Up;
+        break;
+    case 35:
+        p->crestDir = D_Right;
+        break;
+    case 44:
+        p->crestDir = D_Center;
+        break;
+    }
+
     CFirm *f = &m_f[newPos];
     quint8 t = f->m_type;
 
     if (plusStart(oldPos, newPos)) {
         if (p->seq == 0) {
             emit sendLog(plName + tr(" получает 25 за проход через СТАРТ"));
-            takeFromBank(pNu, 25);
+//            takeFromBank(pNu, 25);
+            p->money += 25;
         } else {
             emit sendLog(plName + tr(" не получает 25 за проход через СТАРТ из-за секвестра"));
         }
@@ -492,6 +514,8 @@ bool CDoc::canBuy(quint8 player, quint8 fNu)
         return false;
     if (f->owner != 4)
         return false;
+    if (p->investComplit)
+        return false;
     if (playersAtPoleExept(player, fNu) != 0)
         return false;
     if (p->seq > 0)
@@ -537,6 +561,8 @@ bool CDoc::canInvest(quint8 player, quint8 fNu)
     if (p->seq > 0)
         return false;
     if (p->pos != fNu && ! p->canInvest)
+        return false;
+    if (p->investComplit)
         return false;
     CMezon *mz0 = &f->mz[0];
     if (mz0->type == 3) {
@@ -605,6 +631,8 @@ bool CDoc::buyFirm(int newOwner, int fNu, int flNu)
     } else
         emit sendLog(plName + tr(" покупает ") + fName);
 
+    p->hash.insert(fNu, f);
+
     foreach (CMonopol *mn, f->listMon) {
         bool res = true;
         foreach (CFirm *fm, mn->list) {
@@ -650,6 +678,8 @@ bool CDoc::loseFirm(int oldOwner, int fNu)
         return false;
 
     f->owner = 4;
+
+    p->hash.remove(fNu);
 
     foreach (CMonopol *mn, f->listMon) {
         if (mn->owner == oldOwner) {
@@ -1528,9 +1558,14 @@ void CDoc::FillFields()
     m_m[27].list.append(&m_f[25]);
     m_m[27].list.append(&m_f[35]);
 
-    for (quint8 i=0; i<28; i++) {
+    for (quint8 i=0; i<nu_Monopols; i++) {
         foreach (CFirm *f, m_m[i].list) {
             f->listMon.append(&m_m[i]);
         }
     }
+
+    m_p[0].name = tr("Красный");
+    m_p[1].name = tr("Синий");
+    m_p[2].name = tr("Желтый");
+    m_p[3].name = tr("Зеленый");
 }
