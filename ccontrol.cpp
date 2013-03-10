@@ -93,7 +93,8 @@ void CControl::tryBuyFirm(int pl, int fNu, int flNu)
 void CControl::trySellFirm(int pl, int fNu)
 {
     doc.clearLastPay(pl);
-    if (doc.sellFirm(pl, fNu)) {
+    bool res;
+    if (res = doc.sellFirm(pl, fNu)) {
         emit sendToLog(doc.m_p[pl].name + tr(" продает ") + doc.m_f[fNu].name);
         emit docFirmChanged(fNu);
     } else {
@@ -105,6 +106,11 @@ void CControl::trySellFirm(int pl, int fNu)
         plp->mustSellMode = false;
         startMove();
     }
+    if (plp->mustSellQues && res) {
+        plp->mustSellMode = false;
+        startMove();
+    }
+
 }
 
 void CControl::toLog(QString str)
@@ -158,7 +164,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-    pair.first = 6; pair.second = 3;
+    pair.first = 3; pair.second = 2;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -194,6 +200,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         // buy
         emit sendToLog(name + tr(" выбросил 'Купи'"));
         cplp->canBuy = true;
+        cplp->investComplit = false;
     } else if (pair.first == 2 && pair.second == 2) {
         // +20
         emit sendToLog(name + tr(" выбросил +20"));
@@ -213,9 +220,17 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил 'ПБ на платеж'"));
         cplp->pbp += 3;
     } else if (pair.first == 3 && pair.second == 1) {
-
+        // buy
+        emit sendToLog(name + tr(" выбросил 'Поставь мезон'"));
+        cplp->canInvest = true;
+        cplp->investComplit = false;
     } else if (pair.first == 3 && pair.second == 2) {
-
+        // sell
+        emit sendToLog(name + tr(" выбросил 'Продай'"));
+        if (doc.playerOwnerCount(doc.curPl) > 0)
+            cplp->addSell();
+        else
+            emit sendToLog(name + tr(" не имеет фирм"));
     } else if (pair.first == 3 && pair.second == 3) {
         // +30
         emit sendToLog(name + tr(" выбросил +30"));
@@ -249,7 +264,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
     } else if (pair.first == 5 && pair.second == 1) {
 
     } else if (pair.first == 5 && pair.second == 2) {
-        // ???
+        // 3?
         emit sendToLog(name + tr(" выбросил '???'"));
         cplp->addQues(3);
     } else if (pair.first == 5 && pair.second == 3) {
@@ -312,6 +327,10 @@ void CControl::replayStay(int dir)
 void CControl::movePlayer(quint8 st)
 {
     CPlayer *cplp = doc.getCurPlayer();
+
+    cplp->canBuy = false;
+    cplp->canInvest = false;
+
     quint8 oldPos = cplp->pos;
     quint8 newPos = cplp->pos;
     if (doc.go(doc.curPl, st)) {
@@ -355,6 +374,12 @@ void CControl::startGame(void)
     startTurn(0);
 }
 
+void CControl::endGame(quint8 pNu)
+{
+    emit sendToLog(doc.m_p[pNu].name + tr(" выиграл"));
+
+}
+
 void CControl::startTurn(quint8 pNu)
 {
     if (!doc.setCurPlayer(pNu)) {
@@ -371,6 +396,7 @@ void CControl::startTurn(quint8 pNu)
         emit docInfoChanged();
     }*/
     cplp->canBuy = false;
+    cplp->canInvest = false;
     cplp->addMove(1);
 
     startMove();
@@ -386,10 +412,11 @@ void CControl::endOfTurn(int pNu)
 
     emit sendToLog(doc.m_p[pNu].name + tr(" закончил ход"));
     quint8 next = doc.getNextPlayer(1);
-    if (pNu == next)
-        emit sendToLog(doc.m_p[pNu].name + tr(" выиграл"));
     emit changeScenePlayer(next);
-    startTurn(next);
+    if (doc.getActivePlayers() == 1)
+        endGame(next);
+    else
+        startTurn(next);
 }
 
 void CControl::startMove(void)
@@ -410,7 +437,7 @@ void CControl::startMove(void)
         if (cplp->pos == 44 && cplp->crestDir == 0) {   // Start
             emit askDirection(doc.curPl);
         } else if ((cplp->pos == 10 || cplp->pos == 30) && cplp->stay == true) {   // Такси или тюрьма
-            if (doc.playerCapital(doc.curPl) > 10)
+            if (doc.playerCapital(doc.curPl) > 10 && cplp->seq == 0)
                 emit askStayTT(doc.curPl);
             else {
                 emit sendToLog(cplp->name + tr(" не может выкупиться"));
@@ -422,6 +449,10 @@ void CControl::startMove(void)
         break;
     case Q_Ques:
         emit askQuestion(doc.curPl);
+        break;
+    case Q_Sell:
+        cplp->mustSellQues = true;
+        emit askSell(doc.curPl);
         break;
     }
 }

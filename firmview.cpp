@@ -179,7 +179,7 @@ void FirmView::RedrawMesons(QPainter *p)
             QRect(57, 114, 49, 20), QRect(), QRect(), QRect(), QRect(), QRect(),
             QRect(32, 114, 49, 20), QRect(82, 114, 49, 20), QRect(), QRect(), QRect(), QRect(),
             QRect(8, 114, 49, 20), QRect(57, 114, 49, 20), QRect(106, 114, 49, 20), QRect(), QRect(), QRect(),
-            QRect(32, 105, 49, 20), QRect(82, 105, 49, 20), QRect(32, 124, 49, 20), QRect(82, 124, 49, 20), QRect(), QRect(),
+            QRect(32, 105, 49, 20), QRect(82, 105, 49, 20), QRect(22, 124, 59, 20), QRect(82, 124, 59, 20), QRect(), QRect(),
             QRect(8, 105, 49, 20), QRect(57, 105, 49, 20), QRect(106, 105, 49, 20), QRect(32, 124, 49, 20), QRect(82, 124, 49, 20), QRect(),
             QRect(8, 105, 49, 20), QRect(57, 105, 49, 20), QRect(106, 105, 49, 20), QRect(4, 124, 49, 20), QRect(57, 124, 49, 20), QRect(106, 124, 49, 20)
     };

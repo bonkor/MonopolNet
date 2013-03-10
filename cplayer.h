@@ -11,7 +11,8 @@ enum QueueType
 {
     Q_No,       // ничего
     Q_Move,     // ход
-    Q_Ques      // вопрос
+    Q_Ques,     // вопрос
+    Q_Sell      // продажа после вопроса
 };
 
 class CLP
@@ -33,6 +34,7 @@ public:
     quint8 getNextAction(void);
     void addMove(int mv);   // добавить mv ходов вперед
     void addQues(int q);    // добавить q вопросов (немедленно)
+    void addSell(void);     // добавить необходимость продажи (немедленно)
 
     bool active;        // игрок играет
     int pos;            // положение игрока
@@ -45,6 +47,7 @@ public:
     bool canInvest;     // в вопросе выпало "Поставить мезон"
     bool stay;          // попал в тюрьму или такси
     bool mustSellMode;  // ушел в минус. должен что то продать
+    bool mustSellQues;  // должен что то продать после вопроса
     quint8 pbp;         // кол-во ПБ-шек на платеж
     quint8 pbq;         // кол-во ПБ-шек на вопрошалку
     quint8 turnToStart; // свернуть к старту

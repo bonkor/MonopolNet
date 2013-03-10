@@ -26,6 +26,7 @@ signals:
     void askDirection(int fPu);
     void askCubik(int fPu);
     void askStay(int fPu);
+    void askSell(int fPu);
     void askStayTT(int fPu);
     void askSellSomething(int fPu);
     void askQuestion(int fPu);
@@ -34,6 +35,7 @@ signals:
     void disCubik(int fPu);
 public slots:
     void startGame(void);
+    void endGame(quint8 pNu);
     void startTurn(quint8 pNu);
     void startMove(void);
     void tryInvestFirm(int pl, int fNu, int flNu = 0);

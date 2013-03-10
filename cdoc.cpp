@@ -25,8 +25,8 @@ quint8 CDoc::getActivePlayers(void)
 
 quint8 CDoc::getNextPlayer(int skip)
 {
-    quint8 ap = getActivePlayers();
-    skip %= ap;
+//    quint8 ap = getActivePlayers();
+//    skip %= ap;
 
     quint8 cp = curPl;
     for (quint8 i=0; i<skip; i++) {
@@ -126,7 +126,7 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
     QString toPlName = tp->name;
 
     if (fp->seq > 0) {
-        emit sendLog(fromPlName + tr(" не платит ") + toPlName + sum.toString() + tr(" из-за секвестра"));
+        emit sendLog(fromPlName + tr(" не платит ") + toPlName + tr(" ") + sum.toString() + tr(" из-за секвестра"));
         return sum;
     }
     if (tp->seq > 0) {
@@ -155,6 +155,7 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
 
 void CDoc::sellAll(quint8 pNu)
 {
+    qDebug() << " вызывыю sellAll";
     CPlayer *p = &m_p[pNu];
 
     foreach (quint8 fn, p->hash.keys()) {
@@ -229,9 +230,10 @@ quint8 CDoc::calculateNextPos(quint8 pNu, quint8 st)
             else {
                 curPos -= st;
                 if (curPos < 40) {
-                    if (p->stepsBack == 0)
+                    if (p->stepsBack == 0) {
                         curPos = 39 - curPos + 35;
-                    else
+                        if (curPos == 40) curPos = 0;
+                    } else
                         curPos = 35 + curPos - 39;
                 }
             }
@@ -433,6 +435,9 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     }
     if (p->stepsBack > 0)
         p->stepsBack--;
+    if (p->seq > 0)
+        p->seq--;
+
 
     switch (newPos) {
     case 5:
@@ -589,24 +594,26 @@ bool CDoc::canInvest(quint8 player, quint8 fNu)
         return false;
     if (p->seq > 0)
         return false;
-    if (p->pos != fNu && ! p->canInvest)
-        return false;
     if (p->investComplit)
         return false;
     CMezon *mz0 = &f->mz[0];
-    if (mz0->type == 3) {
-        if (p->money < mz0->invest)
+    if (mz0->type != 3 && f->cur_mz == f->m_nu)
+        return false;
+    if (! p->canInvest) {
+        if (p->pos != fNu)
             return false;
-    } else {
-        if (f->cur_mz == f->m_nu)
-            return false;
-        CMezon *mz = &f->mz[f->cur_mz];
-        if (p->money < mz->invest)
-            return false;
-        if (mz->type == 1 && playerOwnerCount(player) == 0)
-            return false;
-        if (mz->type == 2 && playerMonCount(player) == 0)
-            return false;
+        if (mz0->type == 3) {
+            if (p->money < mz0->invest)
+                return false;
+        } else {
+            CMezon *mz = &f->mz[f->cur_mz];
+            if (p->money < mz->invest)
+                return false;
+            if (mz->type == 1 && playerOwnerCount(player) == 0)
+                return false;
+            if (mz->type == 2 && playerMonCount(player) == 0)
+                return false;
+        }
     }
 
     return true;
@@ -736,28 +743,41 @@ bool CDoc::investFirm(int owner, int fNu, int flNu)
 
     CMezon *mz0 = &f->mz[0];
     if (mz0->type == 3) {
-        p->money -= mz0->invest;
         f->cur_mz++;
         p->investComplit = true;
-        emit sendLog(plName + tr(" не ставит мезон на ") + fName + tr(" за ") + mz0->invest.toString());
+        p->canInvest = false;
+        if (p->canInvest) {
+            emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" бесплатно"));
+        } else {
+            p->money -= mz0->invest;
+            emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" за ") + mz0->invest.toString());
+        }
     } else {
         CMezon *mz = &f->mz[f->cur_mz];
-        if (mz->type == 1 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner)) {
-            emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
-            return false;
+        if (p->canInvest) {
+            f->cur_mz++;
+            p->investComplit = true;
+            p->canInvest = false;
+            emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" бесплатно"));
+        } else {
+            if (mz->type == 1 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner)) {
+                emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
+                return false;
+            }
+            if (mz->type == 2 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner || m_f[flNu].GetMultiplicator() == 1)) {
+                emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
+                return false;
+            }
+            p->money -= mz->invest;
+            f->cur_mz++;
+            p->investComplit = true;
+            p->canInvest = false;
+            if (mz->type == 1 || mz->type == 2) {
+                loseFirm(owner, flNu);
+                emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" за ") + mz->invest.toString() + tr(" и отказывается от ") + m_f[flNu].name);
+            } else
+                emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" за ") + mz->invest.toString());
         }
-        if (mz->type == 2 && (m_f[flNu].m_type != F_Firm || m_f[flNu].owner != owner || m_f[flNu].GetMultiplicator() == 1)) {
-            emit sendLog(plName + tr(" не может поставить мезон на ") + fName);
-            return false;
-        }
-        p->money -= mz->invest;
-        f->cur_mz++;
-        p->investComplit = true;
-        if (mz->type == 1 || mz->type == 2) {
-            loseFirm(owner, flNu);
-            emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" за ") + mz->invest.toString() + tr(" и отказывается от ") + m_f[flNu].name);
-        } else
-            emit sendLog(plName + tr(" ставит мезон на ") + fName + tr(" за ") + mz->invest.toString());
     }
     return true;
 }
@@ -1599,4 +1619,15 @@ void CDoc::FillFields()
     m_p[1].name = tr("Синий");
     m_p[2].name = tr("Желтый");
     m_p[3].name = tr("Зеленый");
+
+/*
+    m_f[41].owner = 0;
+    m_f[41].cur_mz = 4;
+    m_f[51].owner = 1;
+    m_f[51].cur_mz = 5;
+    m_f[45].owner = 2;
+    m_f[45].cur_mz = 5;
+    m_f[54].owner = 3;
+    m_f[54].cur_mz = 1;
+*/
 }

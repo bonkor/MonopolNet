@@ -88,6 +88,7 @@ public slots:
     void askCubik(int pl);
     void askStay(int pl);
     void askStayTT(int pl);
+    void askSell(int pl);
     void askSellSomething(int pl);
     void askQuestion(int pl);
     void enaEndOfTurn(int pl);

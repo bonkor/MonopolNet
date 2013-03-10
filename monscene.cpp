@@ -398,8 +398,14 @@ void MonScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
         QGraphicsItem *item = itemAt(mouseEvent->scenePos());
         if (item && item->data(0).toInt() == 1) {
             int a = item->data(1).toInt();
-            if (doc->m_f[a].m_type == F_Firm) {
+            quint8 t = doc->m_f[a].m_type;
+//            qDebug() << t << a << doc->m_p[scenePlayer].pos;
+            if (t == F_Firm) {
                 showFirm(a, mouseEvent->scenePos());
+                qPane->hide();
+            } else if ((t == F_3Ques || t == F_Ques) && doc->m_p[scenePlayer].pos == a) {
+                fvp->hide();
+                qPane->show();
             } else {
                 fvp->hide();
             }
@@ -409,10 +415,12 @@ void MonScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
             qPaneDragStartWidgetPosition = item->pos();
         } else {
             fvp->hide();
+            qPane->hide();
         }
     }
     if (mouseEvent->button() == Qt::RightButton) {
         fvp->hide();
+        qPane->hide();
     }
     QGraphicsScene::mousePressEvent(mouseEvent);
 }
@@ -497,7 +505,7 @@ void MonScene::investFirm(int fNu)
     CMezon *mz = &f->mz[f->cur_mz];
     quint8 t = mz->type;
     showFirmType = 1;
-    if (t == 0)
+    if (t == 0 || doc->m_p[scenePlayer].canInvest)
         emit pressedInvestFirm(scenePlayer, fNu, 0);
     else if (t == 1) {
         fvp->hide();
@@ -609,10 +617,13 @@ void MonScene::askCubik(int pl)
 
     if(mode == 0)
         addToLog(tr("Бросьте кубик"));
-    else if (mode == 1)
+    else if (mode == 1) {
+        qPane->show();
         addToLog(tr("Бросьте кубик в первый раз"));
-    else if (mode == 2)
+    } else if (mode == 2) {
+        qPane->show();
         addToLog(tr("Бросьте кубик во второй раз"));
+    }
 }
 
 void MonScene::askStay(int pl)
@@ -633,6 +644,17 @@ void MonScene::askStayTT(int pl)
     quint8 dir = doc->getDir();
     showDirChoose(doc->m_p[pl].pos, dir);
     addToLog(tr("Выкупаетесь?"));
+}
+
+void MonScene::askSell(int pl)
+{
+    if (pl != scenePlayer)
+        return;
+
+    showFirmMode = MF_NO;
+    cubik->setEnabled(false);
+    endTurn->setEnabled(false);
+    addToLog(tr("Продйте любую фирму"));
 }
 
 void MonScene::askSellSomething(int pl)
@@ -837,6 +859,7 @@ void MonScene::cubikDropped(int rnd)
         qPane->selectRow(rnd);
         askCubik(scenePlayer);
     } else if (mode == 2) {
+        qPane->show();
         addToLog(tr("Выпало ") + s);
         mode = 0;
         qPane->selectPos(cubik1, rnd);
