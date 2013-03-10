@@ -90,6 +90,7 @@ public slots:
     void askStayTT(int pl);
     void askSell(int pl);
     void askLose(int pl);
+    void askLoseMon(int pl);
     void askSellSomething(int pl);
     void askQuestion(int pl);
     void enaEndOfTurn(int pl);

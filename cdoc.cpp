@@ -88,6 +88,7 @@ CMoney CDoc::giveToBank(quint8 pNu, CMoney sum)
         CMoney cap = playerCapital(pNu);
         if (sum <= cap) {
             p->money -= sum;
+            p->lastPay.set(4, sum);
             emit sendLog(plName + tr(" платит ") + sum.toString());
             if (! p->money.positive())
                 p->mustSellMode = true;
@@ -138,6 +139,7 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
     if (sum <= cap) {
         fp->money -= sum;
         tp->money += sum;
+        fp->lastPay.set(toPl, sum);
         emit sendLog(fromPlName + tr(" платит ") + toPlName + tr(" ") + sum.toString());
         if (! fp->money.positive())
             fp->mustSellMode = true;

@@ -547,7 +547,7 @@ void MonScene::buyFirm(int fNu)
 void MonScene::sellFirm(int fNu)
 {
 //    qDebug("%d", showFirmMode);
-    if (showFirmMode == MF_NO) {
+    if (showFirmMode == MF_NO || showFirmMode == MF_NO_LM) {
         emit pressedSellFirm(scenePlayer, fNu);
     } else if (showFirmMode == MF_LOSE_FIRM || showFirmMode == MF_LOSE_MON) {
         if (showFirmType == 0)
@@ -665,6 +665,16 @@ void MonScene::askLose(int pl){
     cubik->setEnabled(false);
     endTurn->setEnabled(false);
     addToLog(tr("Потеряйте любую фирму"));
+}
+
+void MonScene::askLoseMon(int pl){
+    if (pl != scenePlayer)
+        return;
+
+    showFirmMode = MF_NO_LM;
+    cubik->setEnabled(false);
+    endTurn->setEnabled(false);
+    addToLog(tr("Потеряйте любую фирму из монополии"));
 }
 
 void MonScene::askSellSomething(int pl)

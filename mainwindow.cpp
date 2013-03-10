@@ -48,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      scene, SLOT(askSell(int)));
     QObject::connect(ctrl, SIGNAL(askLose(int)),
                      scene, SLOT(askLose(int)));
+    QObject::connect(ctrl, SIGNAL(askLoseMon(int)),
+                     scene, SLOT(askLoseMon(int)));
 
     QObject::connect(scene, SIGNAL(pressedInvestFirm(int,int,int)),
                      ctrl, SLOT(tryInvestFirm(int,int,int)));

@@ -28,6 +28,7 @@ signals:
     void askStay(int fPu);
     void askSell(int fPu);
     void askLose(int fPu);
+    void askLoseMon(int fPu);
     void askStayTT(int fPu);
     void askSellSomething(int fPu);
     void askQuestion(int fPu);
@@ -44,6 +45,7 @@ public slots:
     void tryBuyFirm(int pl, int fNu, int flNu = 0);
     void trySellFirm(int pl, int fNu);
     void tryLoseFirm(int pl, int fNu);
+    void tryLoseMon(int pl, int fNu);
     void tryPBP(int pl);
     void replayDir(int dir);
     void replayStay(int dir);

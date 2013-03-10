@@ -10,10 +10,11 @@ CPlayer::CPlayer(QObject *parent) :
     stay = false;
     canBuy = false;
     canInvest = false;
-    crestDir = 0;   // невыбрано
+    crestDir = D_Center;   // невыбрано
     mustSellMode = false;
     mustSellQues = false;
     mustLoseQues = false;
+    mustLoseMonQues = false;
 
     pbp = 0;
     pbq = 0;
@@ -43,6 +44,11 @@ void CPlayer::addSell(void)
 void CPlayer::addLose(void)
 {
     queue.insert(0, Q_Lose);
+}
+
+void CPlayer::addLoseMon(void)
+{
+    queue.insert(0, Q_LoseMon);
 }
 
 quint8 CPlayer::getNextAction(void)

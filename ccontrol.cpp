@@ -97,6 +97,10 @@ void CControl::trySellFirm(int pl, int fNu)
         tryLoseFirm(pl, fNu);
         return;
     }
+    if (plp->mustLoseMonQues) {
+        tryLoseMon(pl, fNu);
+        return;
+    }
 
     doc.clearLastPay(pl);
     bool res;
@@ -129,6 +133,27 @@ void CControl::tryLoseFirm(int pl, int fNu)
     CPlayer *plp = &doc.m_p[pl];
     if (plp->mustLoseQues && res) {
         plp->mustLoseQues = false;
+        startMove();
+    }
+}
+
+void CControl::tryLoseMon(int pl, int fNu)
+{
+    bool res;
+    if (doc.m_f[fNu].GetMultiplicator() == 1) {
+        emit sendToLog(doc.m_p[pl].name + tr(" не удается отказаться от ") + doc.m_f[fNu].name);
+        return;
+    }
+
+    if (res = doc.loseFirm(pl, fNu)) {
+        emit sendToLog(doc.m_p[pl].name + tr(" отказываетя от ") + doc.m_f[fNu].name);
+        emit docFirmChanged(fNu);
+    } else {
+        emit sendToLog(doc.m_p[pl].name + tr(" не удается отказаться от ") + doc.m_f[fNu].name);
+    }
+    CPlayer *plp = &doc.m_p[pl];
+    if (plp->mustLoseMonQues && res) {
+        plp->mustLoseMonQues = false;
         startMove();
     }
 }
@@ -184,7 +209,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-    pair.first = 4; pair.second = 3;
+//    pair.first = 5; pair.second = 3;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -287,9 +312,17 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил '???'"));
         cplp->addQues(3);
     } else if (pair.first == 5 && pair.second == 3) {
-
+        // loseMon
+        emit sendToLog(name + tr(" выбросил 'Потеряй фирму из монополии'"));
+        cplp->addLoseMon();
     } else if (pair.first == 5 && pair.second == 4) {
-
+        // lose
+        emit sendToLog(name + tr(" выбросил 'Все потеряли'"));
+        for (quint8 i=0; i<doc.nu_Players; i++) {
+            CPlayer *p = &doc.m_p[i];
+            if (i != pl && p->active)
+                p->addLose();
+        }
     } else if (pair.first == 5 && pair.second == 5) {
 
     } else if (pair.first == 5 && pair.second == 6) {
@@ -486,6 +519,15 @@ void CControl::startMove(void)
         }
         cplp->mustLoseQues = true;
         emit askLose(doc.curPl);
+        break;
+    case Q_LoseMon:
+        if (doc.playerMonCount(doc.curPl) == 0) {
+            emit sendToLog(cplp->name + tr(" не имеет монополий"));
+            startMove();
+            return;
+        }
+        cplp->mustLoseMonQues = true;
+        emit askLoseMon(doc.curPl);
         break;
     }
 }

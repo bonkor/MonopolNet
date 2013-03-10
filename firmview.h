@@ -8,8 +8,9 @@
 enum
 {
     MF_NO,
+    MF_NO_LM,       // выпало на вопросе потерять монополию
     MF_LOSE_FIRM,
-    MF_LOSE_MON
+    MF_LOSE_MON     // потеря монополии для покупки type=2
 };
 
 class FirmView : public QWidget
