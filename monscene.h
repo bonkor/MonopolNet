@@ -14,6 +14,7 @@
 #include "cpictbutton.h"
 #include "ccubik.h"
 #include "cqpane.h"
+#include "cfirmspane.h"
 
 class MonScene : public QGraphicsScene
 {
@@ -29,10 +30,12 @@ private:
     QGraphicsPixmapItem *score[4];
     QGraphicsPixmapItem *pl[4];
     QGraphicsProxyWidget *qW;
+    QGraphicsProxyWidget *qFp;
     QPointF qPaneDragStartMousePosition;
     QPointF qPaneDragStartWidgetPosition;
     FirmView *fvp;
     CQPane *qPane;
+    CFirmsPane *fPane;
     QPushButton *endTurn;
     QPushButton *endMode;
     QPushButton *pbp;

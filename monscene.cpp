@@ -214,6 +214,11 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
     qW->setData(0, 3);
     qW->hide();
 
+    fPane = new CFirmsPane();
+    qFp = addWidget(fPane);
+    qFp->setZValue(12.);
+    qFp->setData(0, 4);
+
     QObject::connect(fvp, SIGNAL(buyFirm(int)),
                      this, SLOT(buyFirm(int)));
     QObject::connect(fvp, SIGNAL(sellFirm(int)),
@@ -413,6 +418,10 @@ void MonScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
             fvp->hide();
             qPaneDragStartMousePosition = mouseEvent->scenePos();
             qPaneDragStartWidgetPosition = item->pos();
+        } else if (item && item->data(0).toInt() == 4) {
+            fvp->hide();
+            qPaneDragStartMousePosition = mouseEvent->scenePos();
+            qPaneDragStartWidgetPosition = item->pos();
         } else {
             fvp->hide();
             qPane->hide();
@@ -429,7 +438,7 @@ void MonScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
     if (mouseEvent->buttons() & Qt::LeftButton) {
         QGraphicsItem *item = itemAt(mouseEvent->scenePos());
-        if (item && item->data(0).toInt() == 3) {
+        if (item && (item->data(0).toInt() == 3 || item->data(0).toInt() == 4)) {
             QPointF p = mouseEvent->scenePos() - qPaneDragStartMousePosition;
             if (p.manhattanLength() < QApplication::startDragDistance())
                 return;
@@ -438,10 +447,10 @@ void MonScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
                 r.setX(0);
             if (r.ry() < 0)
                 r.setY(0);
-            if (r.rx() > GetFieldRect(20).right() - QPaneWidth)
-                r.setX(GetFieldRect(20).right() - QPaneWidth);
-            if (r.ry() > GetFieldRect(20).bottom() - QPaneHeight)
-                r.setY(GetFieldRect(20).bottom() - QPaneHeight);
+            if (r.rx() > GetFieldRect(20).right() - item->boundingRect().width())
+                r.setX(GetFieldRect(20).right() - item->boundingRect().width());
+            if (r.ry() > GetFieldRect(20).bottom() - item->boundingRect().height())
+                r.setY(GetFieldRect(20).bottom() - item->boundingRect().height());
             item->setPos(r);
         }
     }

@@ -145,7 +145,7 @@ void FirmView::setButtonsState(void)
             bc1->show();
             bc1->setDisabled(true);
         }
-    } else if (mode == MF_LOSE_MON && mode == MF_NO_LM) {
+    } else if (mode == MF_LOSE_MON || mode == MF_NO_LM) {
         bl->setDisabled(true);
         br->setDisabled(true);
         bc1->setDisabled(true);
