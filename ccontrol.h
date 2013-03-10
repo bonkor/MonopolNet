@@ -27,6 +27,7 @@ signals:
     void askCubik(int fPu);
     void askStay(int fPu);
     void askSell(int fPu);
+    void askLose(int fPu);
     void askStayTT(int fPu);
     void askSellSomething(int fPu);
     void askQuestion(int fPu);
@@ -42,6 +43,7 @@ public slots:
     void tryTakeFirm(int pl, int fNu);
     void tryBuyFirm(int pl, int fNu, int flNu = 0);
     void trySellFirm(int pl, int fNu);
+    void tryLoseFirm(int pl, int fNu);
     void tryPBP(int pl);
     void replayDir(int dir);
     void replayStay(int dir);

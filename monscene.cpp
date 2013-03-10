@@ -657,6 +657,16 @@ void MonScene::askSell(int pl)
     addToLog(tr("Продйте любую фирму"));
 }
 
+void MonScene::askLose(int pl){
+    if (pl != scenePlayer)
+        return;
+
+    showFirmMode = MF_NO;
+    cubik->setEnabled(false);
+    endTurn->setEnabled(false);
+    addToLog(tr("Потеряйте любую фирму"));
+}
+
 void MonScene::askSellSomething(int pl)
 {
     if (pl != scenePlayer)

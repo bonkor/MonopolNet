@@ -13,6 +13,7 @@ CPlayer::CPlayer(QObject *parent) :
     crestDir = 0;   // невыбрано
     mustSellMode = false;
     mustSellQues = false;
+    mustLoseQues = false;
 
     pbp = 0;
     pbq = 0;
@@ -37,6 +38,11 @@ void CPlayer::addQues(int q)
 void CPlayer::addSell(void)
 {
     queue.insert(0, Q_Sell);
+}
+
+void CPlayer::addLose(void)
+{
+    queue.insert(0, Q_Lose);
 }
 
 quint8 CPlayer::getNextAction(void)

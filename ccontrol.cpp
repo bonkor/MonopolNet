@@ -92,6 +92,12 @@ void CControl::tryBuyFirm(int pl, int fNu, int flNu)
 
 void CControl::trySellFirm(int pl, int fNu)
 {
+    CPlayer *plp = &doc.m_p[pl];
+    if (plp->mustLoseQues) {
+        tryLoseFirm(pl, fNu);
+        return;
+    }
+
     doc.clearLastPay(pl);
     bool res;
     if (res = doc.sellFirm(pl, fNu)) {
@@ -100,17 +106,31 @@ void CControl::trySellFirm(int pl, int fNu)
     } else {
         emit sendToLog(doc.m_p[pl].name + tr(" не удается продать ") + doc.m_f[fNu].name);
     }
-    CPlayer *plp = &doc.m_p[pl];
     if (plp->mustSellMode && plp->money.positive()) {
         qDebug() << pl << "-" << plp->money.toString();
         plp->mustSellMode = false;
         startMove();
     }
     if (plp->mustSellQues && res) {
-        plp->mustSellMode = false;
+        plp->mustSellQues = false;
         startMove();
     }
+}
 
+void CControl::tryLoseFirm(int pl, int fNu)
+{
+    bool res;
+    if (res = doc.loseFirm(pl, fNu)) {
+        emit sendToLog(doc.m_p[pl].name + tr(" отказываетя от ") + doc.m_f[fNu].name);
+        emit docFirmChanged(fNu);
+    } else {
+        emit sendToLog(doc.m_p[pl].name + tr(" не удается отказаться от ") + doc.m_f[fNu].name);
+    }
+    CPlayer *plp = &doc.m_p[pl];
+    if (plp->mustLoseQues && res) {
+        plp->mustLoseQues = false;
+        startMove();
+    }
 }
 
 void CControl::toLog(QString str)
@@ -164,7 +184,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-    pair.first = 3; pair.second = 2;
+    pair.first = 4; pair.second = 3;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -227,10 +247,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
     } else if (pair.first == 3 && pair.second == 2) {
         // sell
         emit sendToLog(name + tr(" выбросил 'Продай'"));
-        if (doc.playerOwnerCount(doc.curPl) > 0)
-            cplp->addSell();
-        else
-            emit sendToLog(name + tr(" не имеет фирм"));
+        cplp->addSell();
     } else if (pair.first == 3 && pair.second == 3) {
         // +30
         emit sendToLog(name + tr(" выбросил +30"));
@@ -252,7 +269,9 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
     } else if (pair.first == 4 && pair.second == 2) {
 
     } else if (pair.first == 4 && pair.second == 3) {
-
+        // lose
+        emit sendToLog(name + tr(" выбросил 'Потеряй'"));
+        cplp->addLose();
     } else if (pair.first == 4 && pair.second == 4) {
         // +50
         emit sendToLog(name + tr(" выбросил +50"));
@@ -451,8 +470,22 @@ void CControl::startMove(void)
         emit askQuestion(doc.curPl);
         break;
     case Q_Sell:
+        if (doc.playerOwnerCount(doc.curPl) == 0) {
+            emit sendToLog(cplp->name + tr(" не имеет фирм"));
+            startMove();
+            return;
+        }
         cplp->mustSellQues = true;
         emit askSell(doc.curPl);
+        break;
+    case Q_Lose:
+        if (doc.playerOwnerCount(doc.curPl) == 0) {
+            emit sendToLog(cplp->name + tr(" не имеет фирм"));
+            startMove();
+            return;
+        }
+        cplp->mustLoseQues = true;
+        emit askLose(doc.curPl);
         break;
     }
 }
