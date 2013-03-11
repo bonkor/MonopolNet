@@ -215,6 +215,7 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
     qW->hide();
 
     fPane = new CFirmsPane();
+    fPane->init(doc);
     qFp = addWidget(fPane);
     qFp->setZValue(12.);
     qFp->setData(0, 4);
