@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     ccubik.cpp \
     cmoney.cpp \
     cqpane.cpp \
-    cfirmspane.cpp
+    cfirmspane.cpp \
+    cmovewidget.cpp
 
 HEADERS  += mainwindow.h \
     pole.h \
@@ -37,6 +38,7 @@ HEADERS  += mainwindow.h \
     ccubik.h \
     cmoney.h \
     cqpane.h \
-    cfirmspane.h
+    cfirmspane.h \
+    cmovewidget.h
 
 FORMS    += mainwindow.ui

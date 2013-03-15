@@ -214,11 +214,12 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
     qW->setData(0, 3);
     qW->hide();
 
-    fPane = new CFirmsPane();
+    fPane = new CFirmsPane(main, Qt::FramelessWindowHint);
+//    fPane = new CFirmsPane();
     fPane->init(doc);
-    qFp = addWidget(fPane);
-    qFp->setZValue(12.);
-    qFp->setData(0, 4);
+//    qFp = addWidget(fPane);
+//    qFp->setZValue(12.);
+//    qFp->setData(0, 4);
 
     QObject::connect(fvp, SIGNAL(buyFirm(int)),
                      this, SLOT(buyFirm(int)));
@@ -236,6 +237,7 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
                      this, SLOT(EOMPressed()));
     QObject::connect(pbp, SIGNAL(clicked()),
                      this, SLOT(PBPPressed()));
+    updateInfo();
 }
 
 MonScene::~MonScene()
@@ -594,6 +596,7 @@ void MonScene::updateInfo(void)
         pbp->show();
     else
         pbp->hide();
+    fPane->update();
 }
 
 void MonScene::showFirmOwnership(quint8 fNu)

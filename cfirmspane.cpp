@@ -1,10 +1,79 @@
 #include <QPainter>
 #include "cfirmspane.h"
 
-CFirmsPane::CFirmsPane(QWidget *parent) :
-    QWidget(parent)
+extern QColor PlColor[5];
+
+CFLabel::CFLabel(QWidget *parent) :
+    QLabel(parent)
 {
-    setFixedSize(500, 300);
+    fNu = 0;
+    setMargin(2);
+
+    pal = palette();
+    pal.setColor(QPalette::Base, QColor(192, 192, 192));
+    setPalette(pal);
+    setAutoFillBackground(true);
+}
+
+void CFLabel::init(QString s, quint8 nu, bool h)
+{
+    QFont font;
+    font.setPointSize(8);
+    font.setUnderline(h);
+    setFont(font);
+
+    setAlignment(Qt::AlignCenter);
+    setText(s);
+    header = h;
+
+    fNu = nu;
+    owner = 4;
+}
+
+void CFLabel::setOwner(quint8 o)
+{
+    if (owner == o)
+        return;
+
+    owner = o;
+
+    if (owner == 4)
+        pal.setColor(QPalette::Text, QColor(0, 0, 0));
+    else
+        pal.setColor(QPalette::Text, PlColor[owner]);
+    setPalette(pal);
+}
+
+quint8 CFLabel::getFirmNu(void)
+{
+    return fNu;
+}
+
+void CFLabel::enterEvent(QEvent *event)
+{
+    if (header)
+        return;
+
+    pal.setColor(backgroundRole(), QColor(128, 128, 128));
+    setPalette(pal);
+}
+
+void CFLabel::leaveEvent(QEvent *event)
+{
+    if (header)
+        return;
+
+    pal.setColor(backgroundRole(), QColor(192, 192, 192));
+    setPalette(pal);
+}
+
+CFirmsPane::CFirmsPane(QWidget *parent, Qt::WindowFlags f) :
+    CMoveWidget(parent, f)
+{
+    setFixedSize(550, 300);
+
+    move(50, 50);
+
     QGridLayout *mainLayout = new QGridLayout(this);
     mainLayout->setMargin(11);
     mainLayout->setSpacing(6);
@@ -13,42 +82,6 @@ CFirmsPane::CFirmsPane(QWidget *parent) :
         vL[i].setMargin(0);
         vL[i].setSpacing(0);
     }
-    for (int i=0; i<4; i++) {
-        hL[i].setMargin(0);
-        hL[i].setSpacing(0);
-    }
-
-    QFont font;
-    font.setPointSize(8);
-    QFont fontMon;
-    fontMon = font;
-    fontMon.setUnderline(true);
-
-
-    for (int j=0; j<17; j++) {
-        m[j].setFont(fontMon);
-        m[j].setAlignment(Qt::AlignCenter);
-        for (int i=0; i<5; i++) {
-            f[j][i].setFont(font);
-            f[j][i].setMargin(2);
-        }
-    }
-
-/*
-    mainLayout->addLayout(&hL[0], 0, 0);
-    mainLayout->addLayout(&hL[1], 1, 0);
-    mainLayout->addLayout(&hL[2], 0, 1);
-    mainLayout->addLayout(&hL[3], 1, 1);
-
-    for (int i=0; i<4; i++)
-        hL[0].addLayout(&vL[i]);
-    for (int i=4; i<9; i++)
-        hL[1].addLayout(&vL[i]);
-    for (int i=9; i<13; i++)
-        hL[2].addLayout(&vL[i]);
-    for (int i=13; i<17; i++)
-        hL[3].addLayout(&vL[i]);
-*/
 
     for (int i=0; i<4; i++)
         mainLayout->addLayout(&vL[i], 0, i);
@@ -80,27 +113,42 @@ void CFirmsPane::init(CDoc * d)
     addLabels(14, 24);
     addLabels(15, 25);
     addLabels(16, 26);
-
 }
 
 void CFirmsPane::addLabels(quint8 lNu, quint8 mNu)
 {
-    m[lNu].setText(doc->m_m[mNu].name);
+    m[lNu].init(doc->m_m[mNu].name, mNu, true);
     vL[lNu].addWidget(&m[lNu]);
     for (int j=0; j<doc->m_m[mNu].list.size(); j++) {
-        f[lNu][j].setText(doc->m_m[mNu].list[j]->name);
+        CFirm *fp = doc->m_m[mNu].list[j];
+        int i = 0;
+        do i++; while (fp != &doc->m_f[i]);
+        f[lNu][j].init(fp->name, i);
         vL[lNu].addWidget(&f[lNu][j]);
     }
     vL[lNu].addStretch(1);
 }
 
+void CFirmsPane::update(void)
+{
+    for (quint8 i=0; i<17; i++) {
+        quint8 nu = m[i].getFirmNu();
+        m[i].setOwner(doc->m_m[nu].owner);
+    }
+    for (quint8 i=0; i<17; i++) {
+        for (quint8 j=0; j<5; j++) {
+            quint8 nu = f[i][j].getFirmNu();
+            if (nu != 0)
+                f[i][j].setOwner(doc->m_f[nu].owner);
+        }
+    }
+}
+
 void CFirmsPane::paintEvent(QPaintEvent *event)
 {
-
     int w = width();
     int h = height();
     QPainter p(this);
-//    p.drawImage(0, 0, Pict);
     QColor c = QColor(192, 192, 192);
     p.fillRect(0, 0, w, h, c);
     p.setPen(QColor(222, 222, 222));
@@ -115,7 +163,41 @@ void CFirmsPane::paintEvent(QPaintEvent *event)
     p.setPen(QColor(0, 0, 0));
     p.drawLine(w - 1, 0, w - 1, h - 1);
     p.drawLine(0, h - 1, w - 1, h - 1);
-//    p.drawImage(4, 4, innerPict);
 
     QWidget::paintEvent(event);
 }
+/*
+void CFirmsPane::mousePressEvent(QMouseEvent *mouseEvent)
+{
+    if (mouseEvent->button() == Qt::LeftButton) {
+        fPaneDragStartMousePosition = mouseEvent->globalPos();
+        fPaneDragStartWidgetPosition = this->pos();
+    }
+    if (mouseEvent->button() == Qt::RightButton) {
+        hide();
+    }
+    QWidget::mousePressEvent(mouseEvent);
+}
+
+void CFirmsPane::mouseMoveEvent(QMouseEvent *mouseEvent)
+{
+    QPoint p = mouseEvent->globalPos() - fPaneDragStartMousePosition;
+    if (p.manhattanLength() < QApplication::startDragDistance())
+        return;
+    QPoint r = fPaneDragStartWidgetPosition + p;
+    if (r.x() < 0)
+        r.setX(0);
+    if (r.y() < 0)
+    r.setY(0);
+    int maxW = this->parentWidget()->geometry().width() - this->geometry().width();
+    int maxH = this->parentWidget()->geometry().height() - this->geometry().height();
+    if (r.rx() > maxW)
+        r.setX(maxW);
+//    if (r.ry() > GetFieldRect(20).bottom() - item->boundingRect().height())
+//        r.setY(GetFieldRect(20).bottom() - item->boundingRect().height());
+
+    move(r);
+
+    QWidget::mouseMoveEvent(mouseEvent);
+}
+*/
