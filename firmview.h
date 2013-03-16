@@ -9,6 +9,7 @@ enum
 {
     MF_NO,
     MF_NO_LM,       // выпало на вопросе потерять монополию
+    MF_NO_MEZ,      // выпало на вопросе снять мезон
     MF_LOSE_FIRM,
     MF_LOSE_MON     // потеря монополии для покупки type=2
 };
@@ -32,6 +33,7 @@ private:
     void RedrawMesons(QPainter *p);
     void setButtonsState(void);
     CPictButton *bl;
+    CPictButton *blm;
     CPictButton *bc1;
     CPictButton *bc2;
     CPictButton *br;
@@ -41,8 +43,10 @@ private slots:
     void takeClicked();
     void buyClicked();
     void sellClicked();
+    void loseMesonClicked();
 
 signals:
+    void loseMezon(int fNu);
     void investFirm(int fNu);
     void takeFirm(int fNu);
     void buyFirm(int fNu);

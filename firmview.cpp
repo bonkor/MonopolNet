@@ -34,6 +34,12 @@ FirmView::FirmView(QWidget *parent, Qt::WindowFlags f, CDoc *d) :
     bl->setDisabled(true);
     bl->show();
 
+    blm = new CPictButton(this);
+    blm->initButton(SelPct[1], SelPct[1], 43, 24);
+    blm->move(8, 144);
+    blm->setDisabled(true);
+    blm->hide();
+
     bc1 = new CPictButton(this);
     bc1->initButton(BuyPct[0], BuyPct[1], 43, 24);
     bc1->move(57, 144);
@@ -41,7 +47,7 @@ FirmView::FirmView(QWidget *parent, Qt::WindowFlags f, CDoc *d) :
     bc1->show();
 
     bc2 = new CPictButton(this);
-    bc2->initButton(SelPct[0], SelPct[1], 43, 24);
+    bc2->initButton(SelPct[0], SelPct[0], 43, 24);
     bc2->move(57, 144);
     bc2->setDisabled(true);
     bc2->hide();
@@ -55,6 +61,7 @@ FirmView::FirmView(QWidget *parent, Qt::WindowFlags f, CDoc *d) :
     QObject::connect(bc1, SIGNAL(clicked()), this, SLOT(buyClicked()));
     QObject::connect(bc2, SIGNAL(clicked()), this, SLOT(sellClicked()));
     QObject::connect(bl, SIGNAL(clicked()), this, SLOT(investClicked()));
+    QObject::connect(blm, SIGNAL(clicked()), this, SLOT(loseMesonClicked()));
     QObject::connect(br, SIGNAL(clicked()), this, SLOT(takeClicked()));
 }
 
@@ -120,7 +127,10 @@ void FirmView::paintEvent(QPaintEvent *event)
 
 void FirmView::setButtonsState(void)
 {
-    if (mode == MF_NO) {
+    switch (mode) {
+    case MF_NO:
+        blm->hide();
+        bl->show();
         if (doc->canInvest(curPl, nu))
             bl->setDisabled(false);
         else
@@ -142,7 +152,10 @@ void FirmView::setButtonsState(void)
             bc1->setDisabled(true);
             bc1->show();
         }
-    } else if (mode == MF_LOSE_FIRM) {
+        break;
+    case MF_LOSE_FIRM:
+        blm->hide();
+        bl->show();
         bl->setDisabled(true);
         br->setDisabled(true);
         bc1->setDisabled(true);
@@ -155,7 +168,11 @@ void FirmView::setButtonsState(void)
             bc1->show();
             bc1->setDisabled(true);
         }
-    } else if (mode == MF_LOSE_MON || mode == MF_NO_LM) {
+        break;
+    case MF_LOSE_MON:
+    case MF_NO_LM:
+        blm->hide();
+        bl->show();
         bl->setDisabled(true);
         br->setDisabled(true);
         bc1->setDisabled(true);
@@ -168,7 +185,26 @@ void FirmView::setButtonsState(void)
             bc1->show();
             bc1->setDisabled(true);
         }
+        break;
+    case MF_NO_MEZ:
+        if (fp->owner == curPl && fp->cur_mz > 0) {
+            bl->hide();
+            bl->setDisabled(true);
+            blm->show();
+            blm->setDisabled(false);
+        } else {
+            bl->show();
+            bl->setDisabled(true);
+            blm->hide();
+            blm->setDisabled(true);
+        }
+        br->setDisabled(true);
+        bc2->hide();
+        bc1->show();
+        bc1->setDisabled(true);
+        break;
     }
+
 }
 
 void FirmView::RedrawMesons(QPainter *p)
@@ -236,6 +272,12 @@ void FirmView::sellClicked()
 void FirmView::investClicked()
 {
     emit investFirm(nu);
+}
+
+void FirmView::loseMesonClicked()
+{
+    qDebug() << tr("FirmView::loseMesonClicked");
+    emit loseMezon(nu);
 }
 
 void FirmView::takeClicked()

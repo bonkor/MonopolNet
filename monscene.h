@@ -66,6 +66,7 @@ protected:
 signals:
     void pressedInvestFirm(int pl, int fNu, int flNu);
     void pressedTakeFirm(int pl, int fNu);
+    void pressedLoseMezon(int pl, int fNu);
     void pressedBuyFirm(int pl, int fNu, int flNu);
     void pressedSellFirm(int pl, int fNu);
     void replayDir(int dir);
@@ -89,6 +90,7 @@ public slots:
     void askSell(int pl);
     void askLose(int pl);
     void askLoseMon(int pl);
+    void askLoseMezon(int pl);
     void askSellSomething(int pl);
     void askQuestion(int pl);
     void enaEndOfTurn(int pl);
@@ -97,6 +99,7 @@ public slots:
 
 private slots:
     void investFirm(int fNu);
+    void loseMezon(int fNu);
     void takeFirm(int fNu);
     void buyFirm(int fNu);
     void sellFirm(int fNu);

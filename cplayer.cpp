@@ -15,10 +15,12 @@ CPlayer::CPlayer(QObject *parent) :
     mustSellQues = false;
     mustLoseQues = false;
     mustLoseMonQues = false;
+    mustLoseMeson = false;
 
     pbp = 0;
     pbq = 0;
     turnToStart = 0;
+    plusStart = 0;
     stepsBack = 0;
 }
 
@@ -30,25 +32,10 @@ void CPlayer::addMove(int mv)
         queue << Q_Move;
 }
 
-void CPlayer::addQues(int q)
+void CPlayer::insertToQueue(QueueType q, quint8 nu)
 {
-    for (int i=0; i<q; i++)
-        queue.insert(0, Q_Ques);
-}
-
-void CPlayer::addSell(void)
-{
-    queue.insert(0, Q_Sell);
-}
-
-void CPlayer::addLose(void)
-{
-    queue.insert(0, Q_Lose);
-}
-
-void CPlayer::addLoseMon(void)
-{
-    queue.insert(0, Q_LoseMon);
+    for (int i=0; i<nu; i++)
+        queue.insert(0, q);
 }
 
 quint8 CPlayer::getNextAction(void)

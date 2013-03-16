@@ -53,6 +53,17 @@ quint8 CDoc::playerOwnerCount(quint8 pNu)
     return m_p[pNu].hash.size();
 }
 
+quint8 CDoc::playerMezonCount(quint8 pNu)
+{
+    CPlayer *p = &m_p[pNu];
+    quint16 sum = 0;
+
+    foreach (quint8 fn, p->hash.keys()) {
+        sum += p->hash.value(fn)->cur_mz;
+    }
+    return sum;
+}
+
 quint8 CDoc::playerMonCount(quint8 pNu)
 {
     return m_p[pNu].listMon.size();
@@ -464,9 +475,17 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
 
     if (plusStart(oldPos, newPos)) {
         if (p->seq == 0) {
-            emit sendLog(plName + tr(" получает 25 за проход через СТАРТ"));
-//            takeFromBank(pNu, 25);
-            p->money += 25;
+            if (p->plusStart > 0) {
+                emit sendLog(plName + tr(" получает 50 за проход через СТАРТ"));
+                p->money += 50;
+                p->plusStart--;
+            } else if (p->plusStart < 0) {
+                emit sendLog(plName + tr(" не получает 25 за проход через СТАРТ. -st сгорает."));
+                p->plusStart++;
+            } else {
+                emit sendLog(plName + tr(" получает 25 за проход через СТАРТ"));
+                p->money += 25;
+            }
         } else {
             emit sendLog(plName + tr(" не получает 25 за проход через СТАРТ из-за секвестра"));
         }
@@ -594,7 +613,7 @@ bool CDoc::canInvest(quint8 player, quint8 fNu)
         return false;
     if (playersAtPoleExept(player, fNu) != 0)
         return false;
-    if (p->seq > 0)
+    if (p->seq > 0 && ! p->canInvest)
         return false;
     if (p->investComplit)
         return false;

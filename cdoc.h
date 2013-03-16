@@ -25,6 +25,7 @@ public:
     bool plusStart(quint8 oldPos, quint8 newPos);
     quint8 playerOwnerCount(quint8 pNu);
     quint8 playerMonCount(quint8 pNu);
+    quint8 playerMezonCount(quint8 pNu);
     quint8 playersAtPoleExept(quint8 pNu, quint8 pos);
     CMoney playerSumCount(quint8 pNu);
     CMoney playerCapital(quint8 pNu);

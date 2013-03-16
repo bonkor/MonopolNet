@@ -158,6 +158,24 @@ void CControl::tryLoseMon(int pl, int fNu)
     }
 }
 
+void CControl::tryLoseMezon(int pl, int fNu)
+{
+    qDebug() << tr("CControl::tryLoseMezon");
+    CFirm *f = &doc.m_f[fNu];
+    CPlayer *plp = &doc.m_p[pl];
+    if (f->owner != pl || f->cur_mz == 0) {
+        emit sendToLog(plp->name + tr(" не удается снять мезон с ") + f->name);
+        return;
+    }
+
+    f->cur_mz--;
+    emit sendToLog(plp->name + tr(" снимает мезон с ") + f->name);
+
+    plp->mustLoseMeson = false;
+    emit docFirmChanged(fNu);
+    startMove();
+}
+
 void CControl::toLog(QString str)
 {
     emit sendToLog(str);
@@ -209,7 +227,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-//    pair.first = 5; pair.second = 3;
+    pair.first = 4; pair.second = 2;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -236,7 +254,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
     } else if (pair.first == 1 && pair.second == 5) {
         // ?
         emit sendToLog(name + tr(" выбросил '?'"));
-        cplp->addQues(1);
+        cplp->insertToQueue(Q_Ques);
     } else if (pair.first == 1 && pair.second == 6) {
         // ПБ на вопрошалку
         emit sendToLog(name + tr(" выбросил 'ПБ на ?'"));
@@ -272,7 +290,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
     } else if (pair.first == 3 && pair.second == 2) {
         // sell
         emit sendToLog(name + tr(" выбросил 'Продай'"));
-        cplp->addSell();
+        cplp->insertToQueue(Q_Sell);
     } else if (pair.first == 3 && pair.second == 3) {
         // +30
         emit sendToLog(name + tr(" выбросил +30"));
@@ -292,11 +310,13 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил '5 ходов вперед'"));
         cplp->addMove(5);
     } else if (pair.first == 4 && pair.second == 2) {
-
+        // -*
+        emit sendToLog(name + tr(" выбросил 'Сними мезон'"));
+        cplp->insertToQueue(Q_LoseMez);
     } else if (pair.first == 4 && pair.second == 3) {
         // lose
         emit sendToLog(name + tr(" выбросил 'Потеряй'"));
-        cplp->addLose();
+        cplp->insertToQueue(Q_Lose);
     } else if (pair.first == 4 && pair.second == 4) {
         // +50
         emit sendToLog(name + tr(" выбросил +50"));
@@ -306,22 +326,24 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
     } else if (pair.first == 4 && pair.second == 6) {
 
     } else if (pair.first == 5 && pair.second == 1) {
-
+        // +st
+        emit sendToLog(name + tr(" выбросил 'Дополнительные +25 при проходе через СТАРТ'"));
+        cplp->plusStart++;
     } else if (pair.first == 5 && pair.second == 2) {
         // 3?
         emit sendToLog(name + tr(" выбросил '???'"));
-        cplp->addQues(3);
+        cplp->insertToQueue(Q_Ques, 3);
     } else if (pair.first == 5 && pair.second == 3) {
         // loseMon
         emit sendToLog(name + tr(" выбросил 'Потеряй фирму из монополии'"));
-        cplp->addLoseMon();
+        cplp->insertToQueue(Q_LoseMon);
     } else if (pair.first == 5 && pair.second == 4) {
         // lose
         emit sendToLog(name + tr(" выбросил 'Все потеряли'"));
         for (quint8 i=0; i<doc.nu_Players; i++) {
             CPlayer *p = &doc.m_p[i];
             if (i != pl && p->active)
-                p->addLose();
+                p->insertToQueue(Q_Lose);
         }
     } else if (pair.first == 5 && pair.second == 5) {
 
@@ -330,7 +352,9 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
     } else if (pair.first == 6 && pair.second == 1) {
 
     } else if (pair.first == 6 && pair.second == 2) {
-
+        // -st
+        emit sendToLog(name + tr(" выбросил 'Не получать +25 при проходе через СТАРТ'"));
+        cplp->plusStart--;
     } else if (pair.first == 6 && pair.second == 3) {
         // 5 назад
         emit sendToLog(name + tr(" выбросил '5 ходов назад'"));
@@ -408,9 +432,9 @@ void CControl::movePlayer(quint8 st)
             }
         }
     } else if (ft == F_3Ques)
-        cplp->addQues(3);
+        cplp->insertToQueue(Q_Ques, 3);
     else if (ft == F_Ques)
-        cplp->addQues(1);
+        cplp->insertToQueue(Q_Ques);
 
     if (cplp->active) {
         emit showNewPoleForPlayer(doc.curPl);
@@ -493,6 +517,8 @@ void CControl::startMove(void)
                 emit askStayTT(doc.curPl);
             else {
                 emit sendToLog(cplp->name + tr(" не может выкупиться"));
+                if (cplp->seq > 0)
+                    cplp->seq--;
                 startMove();
             }
         } else {
@@ -528,6 +554,15 @@ void CControl::startMove(void)
         }
         cplp->mustLoseMonQues = true;
         emit askLoseMon(doc.curPl);
+        break;
+    case Q_LoseMez:
+        if (doc.playerMezonCount(doc.curPl) == 0) {
+            emit sendToLog(cplp->name + tr(" не имеет мезонов"));
+            startMove();
+            return;
+        }
+        cplp->mustLoseMeson = true;
+        emit askLoseMezon(doc.curPl);
         break;
     }
 }

@@ -29,6 +29,7 @@ signals:
     void askSell(int fPu);
     void askLose(int fPu);
     void askLoseMon(int fPu);
+    void askLoseMezon(int fPu);
     void askStayTT(int fPu);
     void askSellSomething(int fPu);
     void askQuestion(int fPu);
@@ -42,6 +43,7 @@ public slots:
     void startMove(void);
     void tryInvestFirm(int pl, int fNu, int flNu = 0);
     void tryTakeFirm(int pl, int fNu);
+    void tryLoseMezon(int pl, int fNu);
     void tryBuyFirm(int pl, int fNu, int flNu = 0);
     void trySellFirm(int pl, int fNu);
     void tryLoseFirm(int pl, int fNu);

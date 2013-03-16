@@ -114,10 +114,10 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
     }
 //field[36]->setPixmap(QPixmap::fromImage(FieldPict[F_Ques]));
 
-    int x = 590;
+    int x = 585;
     int y = 90;
-    int w = 60;
-    int h = 30;
+    int w = 120;
+    int h = 60;
     for (int i=0; i<doc->nu_Players; i++) {
         QImage img = QImage(w, h, QImage::Format_RGB32);
         img.fill(QColor(255, 255, 255));
@@ -130,7 +130,7 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
         np.setX(x);
         np.setY(y);
         score[i]->setPos(np);
-        y += 40;
+        y += 70;
     }
     showScore();
 
@@ -218,6 +218,8 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
                      this, SLOT(showMonPane()));
 
 
+    QObject::connect(fvp, SIGNAL(loseMezon(int)),
+                     this, SLOT(loseMezon(int)));
     QObject::connect(fvp, SIGNAL(buyFirm(int)),
                      this, SLOT(buyFirm(int)));
     QObject::connect(fvp, SIGNAL(sellFirm(int)),
@@ -381,7 +383,8 @@ void MonScene::showScore(void)
         QPainter p(&img);
         int w = img.width();
         int h = img.height();
-        if (doc->m_p[i].active)
+        CPlayer *pl = &doc->m_p[i];
+        if (pl->active)
             p.fillRect(1, 1, w-2, h-2, QColor(255, 255, 255));
         else
             p.fillRect(1, 1, w-2, h-2, QColor(128, 128, 128));
@@ -389,9 +392,32 @@ void MonScene::showScore(void)
         fn.setBold(1);
         p.setFont(fn);
         p.setPen(PlColor[i]);
-        QString tmpStr;
-        tmpStr = doc->m_p[i].money.toString();
-        p.drawText(QRect(1, 1, w-2, h-2), Qt::AlignCenter, tmpStr);
+        QString tmpStr, stateStr1, stateStr2, stateStr3;
+        if (pl->seq > 0) {
+            tmpStr.setNum(pl->seq);
+            stateStr1 += tr(" Сек: ") + tmpStr;
+        }
+        if (pl->pbp > 0) {
+            tmpStr.setNum(pl->pbp);
+            stateStr1 += tr(" ПБ: ") + tmpStr;
+        }
+        if (pl->pbq > 0) {
+            tmpStr.setNum(pl->pbq);
+            stateStr1 += tr(" ПБВ: ") + tmpStr;
+        }
+        if (pl->turnToStart > 0) {
+            tmpStr.setNum(pl->turnToStart);
+            stateStr2 += tr(" Св.к.старту: ") + tmpStr;
+        }
+        if (pl->plusStart != 0) {
+            tmpStr.setNum(abs(pl->plusStart));
+            if (pl->plusStart > 0)
+                stateStr3 += tr(" +st: ") + tmpStr;
+            else
+                stateStr3 += tr(" -st: ") + tmpStr;
+        }
+        tmpStr = pl->money.toString();
+        p.drawText(QRect(1, 1, w-2, h-2), Qt::AlignCenter, pl->name + tr(": ") + pl->money.toString()  + "\n" + stateStr1 + "\n" + stateStr2 + "\n" + stateStr3);
         p.end();
         score[i]->setPixmap(img);
     }
@@ -526,9 +552,15 @@ void MonScene::buyFirm(int fNu)
     }
 }
 
+void MonScene::loseMezon(int fNu)
+{
+    qDebug() << tr("MonScene::loseMezon");
+    emit pressedLoseMezon(scenePlayer, fNu);
+}
+
 void MonScene::sellFirm(int fNu)
 {
-//    qDebug("%d", showFirmMode);
+    qDebug("showFirmMode: %d", showFirmMode);
     if (showFirmMode == MF_NO || showFirmMode == MF_NO_LM) {
         emit pressedSellFirm(scenePlayer, fNu);
     } else if (showFirmMode == MF_LOSE_FIRM || showFirmMode == MF_LOSE_MON) {
@@ -587,6 +619,7 @@ void MonScene::askDirection(int pl)
     if (pl != scenePlayer)
         return;
 
+    showFirmMode = MF_NO;
     showDirChoose(doc->m_p[pl].pos, 0);
     addToLog(tr("Выберите направление"));
 }
@@ -596,6 +629,7 @@ void MonScene::askCubik(int pl)
     if (pl != scenePlayer)
         return;
 
+    showFirmMode = MF_NO;
     cubik->setEnabled(true);
 
     if(mode == 0)
@@ -614,6 +648,7 @@ void MonScene::askStay(int pl)
     if (pl != scenePlayer)
         return;
 
+    showFirmMode = MF_NO;
     quint8 dir = doc->getDir();
     showDirChoose(doc->m_p[pl].pos, dir);
     addToLog(tr("Остаетесь или уходите?"));
@@ -624,6 +659,7 @@ void MonScene::askStayTT(int pl)
     if (pl != scenePlayer)
         return;
 
+    showFirmMode = MF_NO;
     quint8 dir = doc->getDir();
     showDirChoose(doc->m_p[pl].pos, dir);
     addToLog(tr("Выкупаетесь?"));
@@ -640,7 +676,8 @@ void MonScene::askSell(int pl)
     addToLog(tr("Продйте любую фирму"));
 }
 
-void MonScene::askLose(int pl){
+void MonScene::askLose(int pl)
+{
     if (pl != scenePlayer)
         return;
 
@@ -650,7 +687,8 @@ void MonScene::askLose(int pl){
     addToLog(tr("Потеряйте любую фирму"));
 }
 
-void MonScene::askLoseMon(int pl){
+void MonScene::askLoseMon(int pl)
+{
     if (pl != scenePlayer)
         return;
 
@@ -658,6 +696,17 @@ void MonScene::askLoseMon(int pl){
     cubik->setEnabled(false);
     endTurn->setEnabled(false);
     addToLog(tr("Потеряйте любую фирму из монополии"));
+}
+
+void MonScene::askLoseMezon(int pl)
+{
+    if (pl != scenePlayer)
+        return;
+
+    showFirmMode = MF_NO_MEZ;
+    cubik->setEnabled(false);
+    endTurn->setEnabled(false);
+    addToLog(tr("Снимите мезон с любой фирмы"));
 }
 
 void MonScene::askSellSomething(int pl)
@@ -676,6 +725,7 @@ void MonScene::askQuestion(int pl)
     if (pl != scenePlayer)
         return;
 
+    showFirmMode = MF_NO;
     mode = 1;
     qPane->clear();
     qPane->show();

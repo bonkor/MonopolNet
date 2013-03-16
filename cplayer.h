@@ -14,7 +14,8 @@ enum QueueType
     Q_Ques,     // вопрос
     Q_Sell,     // продажа после вопроса
     Q_LoseMon,  // потеря моноп. после вопроса
-    Q_Lose      // потеря после вопроса
+    Q_Lose,     // потеря после вопроса
+    Q_LoseMez   // снять мезон после вопроса
 };
 
 class CLP
@@ -34,11 +35,8 @@ class CPlayer : public QObject
 public:
     explicit CPlayer(QObject *parent = 0);
     quint8 getNextAction(void);
-    void addMove(int mv);   // добавить mv ходов вперед
-    void addQues(int q);    // добавить q вопросов (немедленно)
-    void addSell(void);     // добавить необходимость продажи (немедленно)
-    void addLose(void);     // добавить необходимость потери (немедленно)
-    void addLoseMon(void);  // добавить необходимость потери фирмы из монополии (немедленно)
+    void insertToQueue(QueueType q, quint8 nu = 1); // добавить nu действий (немедленно)
+    void addMove(int mv);   // добавить mv ходов вперед/назад
 
     bool active;        // игрок играет
     int pos;            // положение игрока
@@ -54,9 +52,11 @@ public:
     bool mustSellQues;  // должен что то продать после вопроса
     bool mustLoseQues;  // должен что то потерять после вопроса
     bool mustLoseMonQues;  // должен потерять монополию после вопроса
+    bool mustLoseMeson; // должен снять мезон после вопроса
     quint8 pbp;         // кол-во ПБ-шек на платеж
     quint8 pbq;         // кол-во ПБ-шек на вопрошалку
     quint8 turnToStart; // свернуть к старту
+    qint8 plusStart;    // +st/-st
     QString name;
     CLP lastPay;        // последний платеж
     QHash<quint8, CFirm*> hash;     // список фирм

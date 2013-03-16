@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      scene, SLOT(askLose(int)));
     QObject::connect(ctrl, SIGNAL(askLoseMon(int)),
                      scene, SLOT(askLoseMon(int)));
+    QObject::connect(ctrl, SIGNAL(askLoseMezon(int)),
+                     scene, SLOT(askLoseMezon(int)));
 
     QObject::connect(scene, SIGNAL(pressedInvestFirm(int,int,int)),
                      ctrl, SLOT(tryInvestFirm(int,int,int)));
@@ -59,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      ctrl, SLOT(tryBuyFirm(int,int,int)));
     QObject::connect(scene, SIGNAL(pressedSellFirm(int,int)),
                      ctrl, SLOT(trySellFirm(int,int)));
+    QObject::connect(scene, SIGNAL(pressedLoseMezon(int,int)),
+                     ctrl, SLOT(tryLoseMezon(int,int)));
     QObject::connect(scene, SIGNAL(replayDir(int)),
                      ctrl, SLOT(replayDir(int)));
     QObject::connect(scene, SIGNAL(replayCubik(int)),
