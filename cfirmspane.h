@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QLayout>
 #include <QLabel>
+#include <QMouseEvent>
 #include "cdoc.h"
 #include "cmovewidget.h"
 
@@ -26,7 +27,11 @@ private:
     quint8 fNu;
     quint8 owner;
 
+protected:
+    virtual void mouseReleaseEvent(QMouseEvent * event);
+
 signals:
+    void labClick(int nu);
 
 public slots:
 
@@ -52,9 +57,13 @@ private:
 
     void addLabels(quint8 lNu, quint8 mNu);
 signals:
-    
+    void viewFirm(int nu);
+
+private slots:
+    void labClick(int nu);
+
 public slots:
-    
+
 };
 
 #endif // CFIRMSPANE_H

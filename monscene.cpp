@@ -205,21 +205,18 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
     fvp = new FirmView(main, Qt::FramelessWindowHint, doc);
     fvp->hide();
 
-//    qPane = new CQPane(main, Qt::FramelessWindowHint);
-    qPane = new CQPane();
-//    qPane->show();
-    qW = addWidget(qPane);
-    qW->setPos(50., 50.);
-    qW->setZValue(11.);
-    qW->setData(0, 3);
-    qW->hide();
+    qPane = new CQPane(main, Qt::FramelessWindowHint);
+    qPane->hide();
 
     fPane = new CFirmsPane(main, Qt::FramelessWindowHint);
-//    fPane = new CFirmsPane();
     fPane->init(doc);
-//    qFp = addWidget(fPane);
-//    qFp->setZValue(12.);
-//    qFp->setData(0, 4);
+    fPane->hide();
+
+    QObject::connect(fPane, SIGNAL(viewFirm(int)),
+                     this, SLOT(showFirm(int)));
+    QObject::connect(fvp, SIGNAL(showMonPane()),
+                     this, SLOT(showMonPane()));
+
 
     QObject::connect(fvp, SIGNAL(buyFirm(int)),
                      this, SLOT(buyFirm(int)));
@@ -417,51 +414,24 @@ void MonScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
             } else {
                 fvp->hide();
             }
-        } else if (item && item->data(0).toInt() == 3) {
-            fvp->hide();
-            qPaneDragStartMousePosition = mouseEvent->scenePos();
-            qPaneDragStartWidgetPosition = item->pos();
-        } else if (item && item->data(0).toInt() == 4) {
-            fvp->hide();
-            qPaneDragStartMousePosition = mouseEvent->scenePos();
-            qPaneDragStartWidgetPosition = item->pos();
         } else {
             fvp->hide();
             qPane->hide();
+            fPane->hide();
         }
     }
     if (mouseEvent->button() == Qt::RightButton) {
         fvp->hide();
         qPane->hide();
+        fPane->hide();
     }
     QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
-void MonScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
-{
-    if (mouseEvent->buttons() & Qt::LeftButton) {
-        QGraphicsItem *item = itemAt(mouseEvent->scenePos());
-        if (item && (item->data(0).toInt() == 3 || item->data(0).toInt() == 4)) {
-            QPointF p = mouseEvent->scenePos() - qPaneDragStartMousePosition;
-            if (p.manhattanLength() < QApplication::startDragDistance())
-                return;
-            QPointF r = qPaneDragStartWidgetPosition + p;
-            if (r.rx() < 0)
-                r.setX(0);
-            if (r.ry() < 0)
-                r.setY(0);
-            if (r.rx() > GetFieldRect(20).right() - item->boundingRect().width())
-                r.setX(GetFieldRect(20).right() - item->boundingRect().width());
-            if (r.ry() > GetFieldRect(20).bottom() - item->boundingRect().height())
-                r.setY(GetFieldRect(20).bottom() - item->boundingRect().height());
-            item->setPos(r);
-        }
-    }
-    QGraphicsScene::mouseMoveEvent(mouseEvent);
-}
-
 void MonScene::showFirm(int fNu, QPointF point)
 {
+    fPane->hide();
+
     if (point == QPointF(0,0)) {
         QPoint p = GetFieldRect(fNu).center();
         point = mainW->mapToScene(p);
@@ -708,7 +678,7 @@ void MonScene::askQuestion(int pl)
 
     mode = 1;
     qPane->clear();
-    qW->show();
+    qPane->show();
     askCubik(pl);
 }
 
@@ -883,7 +853,7 @@ void MonScene::cubikDropped(int rnd)
     QString s;
     s.setNum(rnd);
     if (mode == 0) {
-        qW->hide();
+        qPane->hide();
         emit replayCubik(rnd);
     } else if (mode == 1) {
         addToLog(tr("Выпало ") + s);
@@ -905,7 +875,7 @@ void MonScene::cubikDropped(int rnd)
 
 void MonScene::EOTPressed(void)
 {
-    qW->hide();
+    qPane->hide();
     fvp->hide();
     clearDirBut(D_Nothing);
     emit pressedEndOfTurn(scenePlayer);
@@ -921,6 +891,11 @@ void MonScene::PBPPressed(void)
 {
     pbp->hide();
     emit pressedPBP(scenePlayer);
+}
+
+void MonScene::showMonPane(void)
+{
+    fPane->show();
 }
 
 void MonScene::enaEndOfTurn(int pl)

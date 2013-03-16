@@ -47,6 +47,7 @@ signals:
     void takeFirm(int fNu);
     void buyFirm(int fNu);
     void sellFirm(int fNu);
+    void showMonPane(void);
 
 public slots:
     

@@ -67,6 +67,14 @@ void CFLabel::leaveEvent(QEvent *event)
     setPalette(pal);
 }
 
+void CFLabel::mouseReleaseEvent(QMouseEvent * event)
+{
+    if (event->button() == Qt::LeftButton) {
+        emit labClick(fNu);
+    }
+    QWidget::mouseReleaseEvent(event);
+}
+
 CFirmsPane::CFirmsPane(QWidget *parent, Qt::WindowFlags f) :
     CMoveWidget(parent, f)
 {
@@ -125,6 +133,8 @@ void CFirmsPane::addLabels(quint8 lNu, quint8 mNu)
         do i++; while (fp != &doc->m_f[i]);
         f[lNu][j].init(fp->name, i);
         vL[lNu].addWidget(&f[lNu][j]);
+        QObject::connect(&f[lNu][j], SIGNAL(labClick(int)),
+                         this, SLOT(labClick(int)));
     }
     vL[lNu].addStretch(1);
 }
@@ -142,6 +152,11 @@ void CFirmsPane::update(void)
                 f[i][j].setOwner(doc->m_f[nu].owner);
         }
     }
+}
+
+void CFirmsPane::labClick(int nu)
+{
+    emit viewFirm(nu);
 }
 
 void CFirmsPane::paintEvent(QPaintEvent *event)
@@ -166,38 +181,3 @@ void CFirmsPane::paintEvent(QPaintEvent *event)
 
     QWidget::paintEvent(event);
 }
-/*
-void CFirmsPane::mousePressEvent(QMouseEvent *mouseEvent)
-{
-    if (mouseEvent->button() == Qt::LeftButton) {
-        fPaneDragStartMousePosition = mouseEvent->globalPos();
-        fPaneDragStartWidgetPosition = this->pos();
-    }
-    if (mouseEvent->button() == Qt::RightButton) {
-        hide();
-    }
-    QWidget::mousePressEvent(mouseEvent);
-}
-
-void CFirmsPane::mouseMoveEvent(QMouseEvent *mouseEvent)
-{
-    QPoint p = mouseEvent->globalPos() - fPaneDragStartMousePosition;
-    if (p.manhattanLength() < QApplication::startDragDistance())
-        return;
-    QPoint r = fPaneDragStartWidgetPosition + p;
-    if (r.x() < 0)
-        r.setX(0);
-    if (r.y() < 0)
-    r.setY(0);
-    int maxW = this->parentWidget()->geometry().width() - this->geometry().width();
-    int maxH = this->parentWidget()->geometry().height() - this->geometry().height();
-    if (r.rx() > maxW)
-        r.setX(maxW);
-//    if (r.ry() > GetFieldRect(20).bottom() - item->boundingRect().height())
-//        r.setY(GetFieldRect(20).bottom() - item->boundingRect().height());
-
-    move(r);
-
-    QWidget::mouseMoveEvent(mouseEvent);
-}
-*/

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QImage>
+#include "cmovewidget.h"
 
 class CQField : public QWidget
 {
@@ -25,7 +26,7 @@ public slots:
 
 };
 
-class CQPane : public QWidget
+class CQPane : public CMoveWidget
 {
     Q_OBJECT
 public:

@@ -50,9 +50,10 @@ QImage CQField::makeTranparant(QImage src)
 
 
 CQPane::CQPane(QWidget *parent, Qt::WindowFlags f) :
-    QWidget(parent, f)
+    CMoveWidget(parent, f)
 {
     setFixedSize(QPaneWidth, QPaneHeight);
+    move(50, 50);
     for (int i=0; i<6; i++)
         for (int j=0; j<6; j++)
             Field[i][j] = new CQField(this, Qt::FramelessWindowHint);

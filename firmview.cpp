@@ -79,6 +79,16 @@ void FirmView::showFirm(int fNu, quint8 pl, quint8 m)
 
 void FirmView::mousePressEvent(QMouseEvent *mouseEvent)
 {
+    if (mouseEvent->button() == Qt::LeftButton) {
+        QPoint p = mouseEvent->pos();
+        QRect r1 = QRect(10, 10, 39, 20);
+        QRect r2 = QRect(59, 10, 39, 20);
+        QRect r3 = QRect(108, 10, 39, 20);
+        if (r1.contains(p) || r2.contains(p) || r3.contains(p)) {
+            hide();
+            emit showMonPane();
+        }
+    }
     if (mouseEvent->button() == Qt::RightButton) {
         hide();
     }

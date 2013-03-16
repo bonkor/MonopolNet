@@ -29,10 +29,6 @@ private:
     QGraphicsPixmapItem *field[57];
     QGraphicsPixmapItem *score[4];
     QGraphicsPixmapItem *pl[4];
-    QGraphicsProxyWidget *qW;
-    QGraphicsProxyWidget *qFp;
-    QPointF qPaneDragStartMousePosition;
-    QPointF qPaneDragStartWidgetPosition;
     FirmView *fvp;
     CQPane *qPane;
     CFirmsPane *fPane;
@@ -66,7 +62,6 @@ private:
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
 
 signals:
     void pressedInvestFirm(int pl, int fNu, int flNu);
@@ -114,6 +109,7 @@ private slots:
     void EOTPressed(void);
     void EOMPressed(void);
     void PBPPressed(void);
+    void showMonPane(void);
 };
 
 #endif // MONSCENE_H
