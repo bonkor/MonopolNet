@@ -12,6 +12,9 @@ enum QueueType
     Q_No,       // ничего
     Q_Move,     // ход
     Q_Ques,     // вопрос
+    Q_Move_Perefiric,   // переместиться на перефирию
+    Q_Move_Crest,       // переместиться на перефирию
+    Q_Move_Between,     // переместиться между фишкой и стартом
     Q_Sell,     // продажа после вопроса
     Q_LoseMon,  // потеря моноп. после вопроса
     Q_Lose,     // потеря после вопроса
@@ -54,6 +57,9 @@ public:
     bool mustLoseQues;  // должен что то потерять после вопроса
     bool mustLoseMonQues;  // должен потерять монополию после вопроса
     bool mustLoseMeson; // должен снять мезон после вопроса
+    bool mustGoPireferic; // должен перейти на перефирию
+    bool mustGoCrest;   // должен перейти на крест
+    bool mustGoBetween; // должен перейти между фишкой и стартом
     quint8 pbp;         // кол-во ПБ-шек на платеж
     quint8 pbq;         // кол-во ПБ-шек на вопрошалку
     quint8 turnToStart; // свернуть к старту

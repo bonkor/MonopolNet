@@ -16,6 +16,13 @@
 #include "cqpane.h"
 #include "cfirmspane.h"
 
+enum {
+    MCM_NO,             // обычный режим
+    MCM_MOVE_CREST,     // перенос на крест
+    MCM_MOVE_PIREFERIC, // перенос на перефирию
+    MCM_MOVE_BETWIN     // перенос между фишкой и стартом
+};
+
 class MonScene : public QGraphicsScene
 {
     Q_OBJECT
@@ -43,11 +50,18 @@ private:
     CPictButton *cbp;
     QTextEdit *te;
     quint8 scenePlayer;
-    quint8 showFirmMode;
+    quint8 sceneMoveMode;   // мода переноса (обычная или перенос фишки)
+    quint8 showFirmMode;    // мода показа карточки фирмы (обычный, при отказе от фирмы/монополии и т.д)
     quint8 showFirmType;    // 0 - buy 1 - invest
     quint8 buyingFirm;      // фирма, с типом != 0 которую собираемся купить или инвестировать
     quint8 mode;            // мода. 0 - обычная 1 - вопрос (перывый бросок кубика) 2 - второй бросок
     quint8 cubik1;          // значение первого броска после моды 1
+
+    // для перемещения:
+    QPointF mouseStartPoint;
+    QPointF fishkaStartPoint;
+    bool fishkaMoving;
+    qint8 lastCI;
 
     void preparePics(void);
     QImage makeTranparant(QImage src);
@@ -59,9 +73,12 @@ private:
     void showStay(void);
     void clearDirBut(quint8 exept);
     void hideEndMode(void);
+    bool isValidForMoving(quint8 pos);
 
 protected:
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
 signals:
     void pressedInvestFirm(int pl, int fNu, int flNu);
@@ -75,6 +92,7 @@ signals:
     void pressedEndOfTurn(int pl);
     void pressedPBP(int pl);
     void droppedQuestion(int pl, QPair<quint8,quint8>);
+    void movedToPole(int pl, int flNu);
 public slots:
     void updateAll(void);
     void updateFirm(int fNu);
@@ -93,6 +111,8 @@ public slots:
     void askLoseMezon(int pl);
     void askSellSomething(int pl);
     void askQuestion(int pl);
+    void askMoveToPireferic(int player);
+    void askMoveToCrest(int player);
     void enaEndOfTurn(int pl);
     void disEndOfTurn(int pl);
     void disCubik(int pl);

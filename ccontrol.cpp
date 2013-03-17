@@ -176,6 +176,29 @@ void CControl::tryLoseMezon(int pl, int fNu)
     startMove();
 }
 
+void CControl::tryMove(int pl, int fNu)
+{
+    qDebug() << tr("CControl::tryMove");
+    CPlayer *plp = &doc.m_p[pl];
+    if (plp->mustGoPireferic) {
+        if (doc.inPireferic(fNu)) {
+            plp->mustGoPireferic = false;
+            movePlayer(0, fNu);
+        } else {
+            emit sendToLog(plp->name + tr(" не может перейти на позицию"));
+        }
+    } else if (plp->mustGoCrest) {
+        if (doc.inCrest(fNu)) {
+            plp->mustGoCrest = false;
+            movePlayer(0, fNu);
+        } else {
+            emit sendToLog(plp->name + tr(" не может перейти на позицию"));
+        }
+    } else {
+        emit sendToLog(plp->name + tr(" не может перейти на позицию"));
+    }
+}
+
 void CControl::toLog(QString str)
 {
     emit sendToLog(str);
@@ -229,7 +252,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-//    pair.first = 4; pair.second = 5;
+    pair.first = 3; pair.second = 5;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -302,7 +325,9 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил -30"));
         doc.giveToBank(pl, 30);
     } else if (pair.first == 3 && pair.second == 5) {
-
+        // на крест
+        emit sendToLog(name + tr(" выбросил 'Встань на любую из креста'"));
+        cplp->insertToQueue(Q_Move_Crest);
     } else if (pair.first == 3 && pair.second == 6) {
         // биржа
         emit sendToLog(name + tr(" выбросил 'Биржа'"));
@@ -328,7 +353,9 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил 'Всем по 10'"));
         doc.transferMoneyToAll(pl, 10);
     } else if (pair.first == 4 && pair.second == 6) {
-
+        // на перефирию
+        emit sendToLog(name + tr(" выбросил 'Встань на любую из перефирии'"));
+        cplp->insertToQueue(Q_Move_Perefiric);
     } else if (pair.first == 5 && pair.second == 1) {
         // +st
         emit sendToLog(name + tr(" выбросил 'Дополнительные +25 при проходе через СТАРТ'"));
@@ -418,7 +445,7 @@ void CControl::replayStay(int dir)
     }
 }
 
-void CControl::movePlayer(quint8 st)
+void CControl::movePlayer(quint8 st, int pos)
 {
     CPlayer *cplp = doc.getCurPlayer();
 
@@ -427,7 +454,7 @@ void CControl::movePlayer(quint8 st)
 
     quint8 oldPos = cplp->pos;
     quint8 newPos = cplp->pos;
-    if (doc.go(doc.curPl, st)) {
+    if (doc.go(doc.curPl, st, pos)) {
         newPos = cplp->pos;
         emit docFirmChanged(newPos);
     } else
@@ -581,6 +608,14 @@ void CControl::startMove(void)
         }
         cplp->mustLoseMeson = true;
         emit askLoseMezon(doc.curPl);
+        break;
+    case Q_Move_Perefiric:
+        cplp->mustGoPireferic = true;
+        emit askMoveToPirefiric(doc.curPl);
+        break;
+    case Q_Move_Crest:
+        cplp->mustGoCrest = true;
+        emit askMoveToCrest(doc.curPl);
         break;
     }
 }

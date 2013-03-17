@@ -20,6 +20,7 @@ public:
     CPlayer *getCurPlayer(void);
     quint8 getDir(void);
     bool inCrest(quint8 pos);
+    bool inPireferic(quint8 pos);
     bool go(quint8 pNu, quint8 st, int pos = -1);
     quint8 calculateNextPos(quint8 pNu, quint8 st);
     bool plusStart(quint8 oldPos, quint8 newPos);

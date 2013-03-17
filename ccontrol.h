@@ -14,7 +14,7 @@ public:
 private:
     CDoc doc;
 
-    void movePlayer(quint8 st);
+    void movePlayer(quint8 st, int pos = -1);
     
 signals:
     void sendToLog(QString);
@@ -33,6 +33,8 @@ signals:
     void askStayTT(int fPu);
     void askSellSomething(int fPu);
     void askQuestion(int fPu);
+    void askMoveToPirefiric(int fPu);
+    void askMoveToCrest(int fPu);
     void enaEndOfTurn(int fPu);
     void disEndOfTurn(int fPu);
     void disCubik(int fPu);
@@ -48,6 +50,7 @@ public slots:
     void trySellFirm(int pl, int fNu);
     void tryLoseFirm(int pl, int fNu);
     void tryLoseMon(int pl, int fNu);
+    void tryMove(int pl, int fNu);
     void tryPBP(int pl);
     void replayDir(int dir);
     void replayStay(int dir);

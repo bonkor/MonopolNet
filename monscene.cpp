@@ -78,7 +78,9 @@ MonScene::MonScene(QObject *parent) :
     setBackgroundBrush(QBrush(QColor(255,255,255), QPixmap("bg.jpg")));
 //    setBackgroundBrush(QBrush(QColor(0,128,0)));
     scenePlayer = 4;
-    showFirmMode = 0;
+    showFirmMode = MF_NO;
+    sceneMoveMode = MCM_NO;
+    lastCI = -1;
 }
 
 void MonScene::init(QGraphicsView *main, CDoc *d)
@@ -102,6 +104,7 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
         }
 
         field[i] = addPixmap(QPixmap::fromImage(img));
+//        field[i]->setCursor(Qt::PointingHandCursor);
         QPointF np;
         QRect r = GetFieldRect(i);
         np.setX(r.x());
@@ -145,6 +148,8 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
         p.drawEllipse(0, 0, w, h);
         p.end();
         pl[i] = addPixmap(QPixmap::fromImage(makeTranparant(img)));
+        pl[i]->setData(0, 2);
+        pl[i]->setData(1, i);
         pl[i]->hide();
     }
     showPlayers();
@@ -424,7 +429,7 @@ void MonScene::showScore(void)
     }
 }
 
-void MonScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
+void MonScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (mouseEvent->button() == Qt::LeftButton) {
         QGraphicsItem *item = itemAt(mouseEvent->scenePos());
@@ -441,6 +446,14 @@ void MonScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
             } else {
                 fvp->hide();
             }
+        } else if (item && item->data(0).toInt() == 2) {
+            if (sceneMoveMode != MCM_NO) {
+                int a = item->data(1).toInt();
+                if (a == scenePlayer) {
+                    mouseStartPoint = mouseEvent->scenePos();
+                    fishkaStartPoint = item->pos();
+                }
+            }
         } else {
             fvp->hide();
             qPane->hide();
@@ -453,6 +466,83 @@ void MonScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
         fPane->hide();
     }
     QGraphicsScene::mousePressEvent(mouseEvent);
+}
+
+void MonScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    if (sceneMoveMode != MCM_NO && mouseEvent->buttons() & Qt::LeftButton) {
+        QGraphicsItem *item = itemAt(mouseEvent->scenePos());
+        if (item && item->data(0).toInt() == 2) {
+            int a = item->data(1).toInt();
+            if (a == scenePlayer) {
+                QPointF p = mouseEvent->scenePos() - mouseStartPoint;
+                if (p.manhattanLength() < QApplication::startDragDistance())
+                    return;
+                fishkaMoving = true;
+                qPane->hide();
+
+                QPointF r = fishkaStartPoint + p;
+                if (r.rx() < 0)
+                    r.setX(0);
+                if (r.ry() < 0)
+                    r.setY(0);
+                qreal maxW = GetFieldRect(20).right() - item->boundingRect().width();
+                qreal maxH = GetFieldRect(20).bottom() - item->boundingRect().height();
+                if (r.rx() > maxW)
+                    r.setX(maxW);
+                if (r.ry() > maxH)
+                    r.setY(maxH);
+
+                item->setPos(r);
+
+                QList<QGraphicsItem *> cil = item->collidingItems();
+                if (cil.size() == 1 && cil[0]->data(0).toInt() == 1 && isValidForMoving(cil[0]->data(1).toInt())) {
+                    int ciNu = cil[0]->data(1).toInt();
+                    if (lastCI != -1 && lastCI != ciNu) {
+                        field[lastCI]->setOpacity(.5);
+                        lastCI = ciNu;
+                        field[ciNu]->setOpacity(1);
+                    } else if (lastCI == -1) {
+                        lastCI = ciNu;
+                        field[ciNu]->setOpacity(1);
+                    }
+                } else {
+                    if (lastCI != -1) {
+                        field[lastCI]->setOpacity(.5);
+                        lastCI = -1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void MonScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    if (mouseEvent->button() == Qt::LeftButton && fishkaMoving) {
+        fishkaMoving = false;
+        if (lastCI != -1) {
+            emit movedToPole(scenePlayer, lastCI);
+            for (quint8 i=0; i<57; i++)
+                field[i]->setOpacity(1);
+            pl[scenePlayer]->unsetCursor();
+            sceneMoveMode = MCM_NO;
+        } else {
+            showPlayers();
+        }
+    }
+}
+
+bool MonScene::isValidForMoving(quint8 pos)
+{
+    switch (sceneMoveMode) {
+    case MCM_NO:
+        return false;
+    case MCM_MOVE_PIREFERIC:
+        return doc->inPireferic(pos);
+    case MCM_MOVE_CREST:
+        return doc->inCrest(pos);
+    }
 }
 
 void MonScene::showFirm(int fNu, QPointF point)
@@ -732,6 +822,32 @@ void MonScene::askQuestion(int pl)
     qPane->clear();
     qPane->show();
     askCubik(pl);
+}
+
+void MonScene::askMoveToPireferic(int player)
+{
+    if (player != scenePlayer)
+        return;
+
+    addToLog(tr("Переместите фишку на любую клетку на перефирии"));
+    sceneMoveMode = MCM_MOVE_PIREFERIC;
+    for (quint8 i=0; i<57; i++)
+        if (doc->inPireferic(i))
+            field[i]->setOpacity(.5);
+    pl[player]->setCursor(Qt::PointingHandCursor);
+}
+
+void MonScene::askMoveToCrest(int player)
+{
+    if (player != scenePlayer)
+        return;
+
+    addToLog(tr("Переместите фишку на любую клетку на кресте"));
+    sceneMoveMode = MCM_MOVE_CREST;
+    for (quint8 i=0; i<57; i++)
+        if (doc->inCrest(i))
+            field[i]->setOpacity(.5);
+    pl[player]->setCursor(Qt::PointingHandCursor);
 }
 
 #define HZ_SHIFT 2

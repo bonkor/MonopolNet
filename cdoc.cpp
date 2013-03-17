@@ -2,7 +2,7 @@
 
 CDoc::CDoc(QObject *parent)
 {
-    nu_Players = 2;
+    nu_Players = 4;
     curPl = 0;
 
     nu_Monopols = 28;
@@ -279,6 +279,14 @@ quint8 CDoc::getDir(void)
 bool CDoc::inCrest(quint8 pos)
 {
     if (pos >= 40 || pos == 5 || pos == 15 || pos == 25 || pos == 35)
+        return true;
+    else
+        return false;
+}
+
+bool CDoc::inPireferic(quint8 pos)
+{
+    if (pos < 40)
         return true;
     else
         return false;
