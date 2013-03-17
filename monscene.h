@@ -20,7 +20,7 @@ enum {
     MCM_NO,             // обычный режим
     MCM_MOVE_CREST,     // перенос на крест
     MCM_MOVE_PIREFERIC, // перенос на перефирию
-    MCM_MOVE_BETWIN     // перенос между фишкой и стартом
+    MCM_MOVE_BETWEEN    // перенос между фишкой и стартом
 };
 
 class MonScene : public QGraphicsScene
@@ -113,6 +113,7 @@ public slots:
     void askQuestion(int pl);
     void askMoveToPireferic(int player);
     void askMoveToCrest(int player);
+    void askMoveBetween(int player);
     void enaEndOfTurn(int pl);
     void disEndOfTurn(int pl);
     void disCubik(int pl);

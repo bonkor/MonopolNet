@@ -35,6 +35,7 @@ signals:
     void askQuestion(int fPu);
     void askMoveToPirefiric(int fPu);
     void askMoveToCrest(int fPu);
+    void askMoveBetween(int fPu);
     void enaEndOfTurn(int fPu);
     void disEndOfTurn(int fPu);
     void disCubik(int fPu);

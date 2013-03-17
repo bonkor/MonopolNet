@@ -194,6 +194,13 @@ void CControl::tryMove(int pl, int fNu)
         } else {
             emit sendToLog(plp->name + tr(" не может перейти на позицию"));
         }
+    } else if (plp->mustGoBetween) {
+        if (doc.inBetween(fNu)) {
+            plp->mustGoBetween = false;
+            movePlayer(0, fNu);
+        } else {
+            emit sendToLog(plp->name + tr(" не может перейти на позицию"));
+        }
     } else {
         emit sendToLog(plp->name + tr(" не может перейти на позицию"));
     }
@@ -235,10 +242,10 @@ void CControl::replayCubik(int rnd)
 {
     doc.clearLastPay(doc.curPl);
     CPlayer *cplp = doc.getCurPlayer();
-    if (doc.canTake(doc.curPl, cplp->pos)) {
-        doc.takeFirm(doc.curPl, cplp->pos);
-        emit docInfoChanged();
-    }
+//    if (doc.canTake(doc.curPl, cplp->pos)) {
+//        doc.takeFirm(doc.curPl, cplp->pos);
+//        emit docInfoChanged();
+//    }
     QString s;
     s.setNum(rnd);
     emit sendToLog(cplp->name + tr(" выбросил ") + s);
@@ -252,7 +259,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-    pair.first = 3; pair.second = 5;
+    pair.first = 2; pair.second = 4;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -298,7 +305,9 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил -20"));
         doc.giveToBank(pl, 20);
     } else if (pair.first == 2 && pair.second == 4) {
-
+        // между фишкой и стартом
+        emit sendToLog(name + tr(" выбросил 'Встань между фишкой и стартом'"));
+        cplp->insertToQueue(Q_Move_Between);
     } else if (pair.first == 2 && pair.second == 5) {
         // тюрьма
         emit sendToLog(name + tr(" выбросил 'Тюрьма'"));
@@ -616,6 +625,10 @@ void CControl::startMove(void)
     case Q_Move_Crest:
         cplp->mustGoCrest = true;
         emit askMoveToCrest(doc.curPl);
+        break;
+    case Q_Move_Between:
+        cplp->mustGoBetween = true;
+        emit askMoveBetween(doc.curPl);
         break;
     }
 }

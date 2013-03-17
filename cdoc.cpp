@@ -292,6 +292,111 @@ bool CDoc::inPireferic(quint8 pos)
         return false;
 }
 
+bool CDoc::inBetween(quint8 pos)
+{
+    CPlayer *p = getCurPlayer();
+    quint8 pPos = p->pos;
+
+    if (pos == pPos || pos == 44)
+        return true;
+
+    if (p->stepsBack == 0) {
+        if (pPos <= 5) {
+            if ((pos > pPos && pos <= 5) || (pos >= 49 && pos <= 52))
+                return true;
+            else
+                return false;
+        } else if (pPos <= 15) {
+            if ((pos > pPos && pos <= 15) || (pos >= 45 && pos <= 48))
+                return true;
+            else
+                return false;
+        } else if (pPos <= 25) {
+            if ((pos > pPos && pos <= 25) || (pos >= 53 && pos <= 56))
+                return true;
+            else
+                return false;
+        } else if (pPos <= 35) {
+            if ((pos > pPos && pos <= 35) || (pos >= 40 && pos <= 43))
+                return true;
+            else
+                return false;
+        } else if (pPos <= 39) {
+            if ((pos > pPos && pos <= 39) || (pos >= 0 && pos <=5) || (pos >= 49 && pos <= 52))
+                return true;
+            else
+                return false;
+        } else if (pPos <= 43) {
+            if (pos > pPos && pos <= 43)
+                return true;
+            else
+                return false;
+        } else if (pPos <= 48) {
+            if (pos > 44 && pos < pPos)
+                return true;
+            else
+                return false;
+        } else if (pPos <= 52) {
+            if (pos > pPos && pos < 52)
+                return true;
+            else
+                return false;
+        } else if (pPos <= 56) {
+            if (pos >= 53 && pos < pPos)
+                return true;
+            else
+                return false;
+        }
+    } else {
+        if (pPos < 5) {
+            if ((pos >= 0 && pos < pPos) || (pos >= 35 && pos <= 39) || (pos >= 40 && pos <= 43))
+                return true;
+            else
+                return false;
+        } else if (pPos < 15) {
+            if ((pos >= 5 && pos < pPos) || (pos >= 49 && pos <= 52))
+                return true;
+            else
+                return false;
+        } else if (pPos < 25) {
+            if ((pos >= 15 && pos < pPos) || (pos >= 45 && pos <= 48))
+                return true;
+            else
+                return false;
+        } else if (pPos < 35) {
+            if ((pos >= 25 && pos < pPos) || (pos >= 53 && pos <= 56))
+                return true;
+            else
+                return false;
+        } else if (pPos <= 39) {
+            if ((pos >= 35 && pos < pPos) || (pos >= 40 && pos <= 43))
+                return true;
+            else
+                return false;
+        } else if (pPos <= 43) {
+            if (pos >= pPos && pos <= 43)
+                return true;
+            else
+                return false;
+        } else if (pPos <= 48) {
+            if (pos > 44 && pos < pPos)
+                return true;
+            else
+                return false;
+        } else if (pPos <= 52) {
+            if (pos > pPos && pos < 52)
+                return true;
+            else
+                return false;
+        } else if (pPos <= 56) {
+            if (pos >= 53 && pos < pPos)
+                return true;
+            else
+                return false;
+        }
+    }
+}
+
 bool CDoc::setCurPlayer(int pNu)
 {
     if (pNu >= nu_Players || ! m_p[pNu].active)
@@ -495,8 +600,8 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     CPlayer *p = &m_p[pNu];
     QString plName = p->name;
 
-//    if (canTake(pNu, pos))
-//        takeFirm(pNu, pos);
+    if (canTake(pNu, pos))
+        takeFirm(pNu, pos);
 
     quint8 oldPos = p->pos;
     quint8 newPos;
@@ -508,6 +613,19 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     qDebug() << "go" << pNu << "-" << st << "-" << pos << " || " << oldPos << "-" << newPos;
     p->pos = newPos;
     p->stay = false;
+
+    if (pos != -1 && inCrest(pos)) {
+        if (pos == 35 || pos < 44)
+            p->crestDir = D_Right;
+        else if(pos == 44)
+            p->crestDir = D_Center;
+        else if(pos <= 48 || pos == 15)
+            p->crestDir = D_Left;
+        else if(pos <= 52 || pos == 5)
+            p->crestDir = D_Down;
+        else if(pos <= 56 || pos == 25)
+            p->crestDir = D_Up;
+    }
 
     if (p->stepsBack == 1) {
         switch (p->crestDir) {

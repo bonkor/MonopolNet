@@ -542,7 +542,10 @@ bool MonScene::isValidForMoving(quint8 pos)
         return doc->inPireferic(pos);
     case MCM_MOVE_CREST:
         return doc->inCrest(pos);
+    case MCM_MOVE_BETWEEN:
+        return doc->inBetween(pos);
     }
+    return false;
 }
 
 void MonScene::showFirm(int fNu, QPointF point)
@@ -846,6 +849,19 @@ void MonScene::askMoveToCrest(int player)
     sceneMoveMode = MCM_MOVE_CREST;
     for (quint8 i=0; i<57; i++)
         if (doc->inCrest(i))
+            field[i]->setOpacity(.5);
+    pl[player]->setCursor(Qt::PointingHandCursor);
+}
+
+void MonScene::askMoveBetween(int player)
+{
+    if (player != scenePlayer)
+        return;
+
+    addToLog(tr("Переместите фишку на любую клетку нею и стартом"));
+    sceneMoveMode = MCM_MOVE_BETWEEN;
+    for (quint8 i=0; i<57; i++)
+        if (doc->inBetween(i))
             field[i]->setOpacity(.5);
     pl[player]->setCursor(Qt::PointingHandCursor);
 }

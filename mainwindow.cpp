@@ -56,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      scene, SLOT(askMoveToPireferic(int)));
     QObject::connect(ctrl, SIGNAL(askMoveToCrest(int)),
                      scene, SLOT(askMoveToCrest(int)));
+    QObject::connect(ctrl, SIGNAL(askMoveBetween(int)),
+                     scene, SLOT(askMoveBetween(int)));
 
     QObject::connect(scene, SIGNAL(pressedInvestFirm(int,int,int)),
                      ctrl, SLOT(tryInvestFirm(int,int,int)));
