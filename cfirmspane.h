@@ -42,6 +42,7 @@ class CFirmsPane : public CMoveWidget
     Q_OBJECT
 public:
     explicit CFirmsPane(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ~CFirmsPane();
     void init(CDoc * d);
     void update(void);
 

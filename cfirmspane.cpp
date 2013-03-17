@@ -100,6 +100,11 @@ CFirmsPane::CFirmsPane(QWidget *parent, Qt::WindowFlags f) :
         mainLayout->addLayout(&vL[i], 2, i - 11);
 }
 
+CFirmsPane::~CFirmsPane()
+{
+    delete mainLayout;
+}
+
 void CFirmsPane::init(CDoc * d)
 {
     doc = d;

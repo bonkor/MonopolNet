@@ -32,6 +32,7 @@ public:
     CMoney giveToBank(quint8 pNu, CMoney sum);
     void takeFromBank(quint8 pNu, CMoney sum);
     CMoney transferMoney(quint8 fromPl, quint8 toPl, CMoney sum);
+    CMoney transferMoneyToAll(quint8 fromPl, CMoney sum);
     void sellAll(quint8 pNu);
     void clearLastPay(quint8 pNu);
 

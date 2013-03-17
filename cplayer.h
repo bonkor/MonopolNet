@@ -21,13 +21,14 @@ enum QueueType
 class CLP
 {
 public:
-    int pl;         // -1 если сброшен
+    QList<quint8> pls;
     CMoney sum;
 
-    CLP() {pl = -1;};
-    void clear(void) {pl = -1;};
-    bool exist(void) {if (pl == -1) return false; else return true;};
-    void set(quint8 p, CMoney s) {pl = p; sum = s;};
+    CLP();
+    void clear(void);
+    bool exist(void);
+    void set(quint8 p, CMoney s);
+    void set(QList<quint8> &l, CMoney s);
 };
 
 class CPlayer : public QObject

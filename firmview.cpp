@@ -68,6 +68,7 @@ FirmView::FirmView(QWidget *parent, Qt::WindowFlags f, CDoc *d) :
 FirmView::~FirmView()
 {
     delete bl;
+    delete blm;
     delete bc1;
     delete bc2;
     delete br;

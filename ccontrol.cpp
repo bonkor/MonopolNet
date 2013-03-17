@@ -23,19 +23,19 @@ void CControl::tryPBP(int pl)
         return;
     }
 
-    QString s;
-    p->money += lp->sum;
-    if (lp->pl != 4) {
-        CPlayer *lpp = &doc.m_p[lp->pl];
-        s = tr(" в пользу ") + lpp->name;
-        lpp->money -= lp->sum;
-        if (! lpp->money.positive())
-            lpp->mustSellMode = true;
+    foreach (quint8 tpl, lp->pls) {
+        QString s;
+        p->money += lp->sum;
+        if (tpl != 4) {
+            CPlayer *lpp = &doc.m_p[tpl];
+            s = tr(" в пользу ") + lpp->name;
+            lpp->money -= lp->sum;
+            if (! lpp->money.positive())
+                lpp->mustSellMode = true;
+        }
+        emit sendToLog(p->name + tr(" отказывается от оплаты ") + lp->sum.toString() + s);
     }
     p->pbp--;
-    QString sPB;
-    sPB.setNum(p->pbp);
-    emit sendToLog(p->name + tr(" отказывается от оплаты ") + lp->sum.toString() + s + tr(". Осталось ПБшек: ") + sPB);
     doc.clearLastPay(pl);
     emit docInfoChanged();
     if (p->mustSellMode && p->money.positive()) {
@@ -212,8 +212,10 @@ void CControl::replayCubik(int rnd)
 {
     doc.clearLastPay(doc.curPl);
     CPlayer *cplp = doc.getCurPlayer();
-    if (doc.canTake(doc.curPl, cplp->pos))
+    if (doc.canTake(doc.curPl, cplp->pos)) {
         doc.takeFirm(doc.curPl, cplp->pos);
+        emit docInfoChanged();
+    }
     QString s;
     s.setNum(rnd);
     emit sendToLog(cplp->name + tr(" выбросил ") + s);
@@ -227,7 +229,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-    pair.first = 4; pair.second = 2;
+//    pair.first = 4; pair.second = 5;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -322,7 +324,9 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил +50"));
         doc.takeFromBank(pl, 50);
     } else if (pair.first == 4 && pair.second == 5) {
-
+        // всем по 10
+        emit sendToLog(name + tr(" выбросил 'Всем по 10'"));
+        doc.transferMoneyToAll(pl, 10);
     } else if (pair.first == 4 && pair.second == 6) {
 
     } else if (pair.first == 5 && pair.second == 1) {
@@ -346,9 +350,17 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
                 p->insertToQueue(Q_Lose);
         }
     } else if (pair.first == 5 && pair.second == 5) {
-
+        // от всех по 10
+        emit sendToLog(name + tr(" выбросил 'От всех по 10'"));
+        for (quint8 i=0; i<doc.nu_Players; i++) {
+            CPlayer *p = &doc.m_p[i];
+            if (i != pl && p->active)
+                doc.transferMoney(i, pl, 10);
+        }
     } else if (pair.first == 5 && pair.second == 6) {
-
+        // всем по 15
+        emit sendToLog(name + tr(" выбросил 'Всем по 15'"));
+        doc.transferMoneyToAll(pl, 15);
     } else if (pair.first == 6 && pair.second == 1) {
 
     } else if (pair.first == 6 && pair.second == 2) {
@@ -366,7 +378,13 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
     } else if (pair.first == 6 && pair.second == 5) {
 
     } else if (pair.first == 6 && pair.second == 6) {
-
+        // от всех по 15
+        emit sendToLog(name + tr(" выбросил 'От всех по 15'"));
+        for (quint8 i=0; i<doc.nu_Players; i++) {
+            CPlayer *p = &doc.m_p[i];
+            if (i != pl && p->active)
+                doc.transferMoney(i, pl, 15);
+        }
     }
     docChanged();
     startMove();

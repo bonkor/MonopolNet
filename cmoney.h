@@ -15,6 +15,7 @@ public:
     friend const CMoney & operator+ (const CMoney & s1, const CMoney & s2);
     friend const CMoney & operator- (const CMoney & s1, const CMoney & s2);
     friend const CMoney & operator* (const CMoney & s1, const qint8 & s2);
+    friend const CMoney & operator/ (const CMoney & s1, const qint8 & s2);
     friend const bool operator== (const CMoney & s1, const CMoney & s2);
     friend const bool operator!= (const CMoney & s1, const CMoney & s2);
     friend const bool operator>= (const CMoney & s1, const CMoney & s2);
@@ -33,6 +34,7 @@ private:
     void add(CMoney s);
     void minus(CMoney s);
     void mul(qint8 m);
+    void div(qint8 m);
 };
 
 #endif // CMONEY_H

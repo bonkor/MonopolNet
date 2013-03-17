@@ -2,7 +2,7 @@
 
 CDoc::CDoc(QObject *parent)
 {
-    nu_Players = 4;
+    nu_Players = 2;
     curPl = 0;
 
     nu_Monopols = 28;
@@ -104,13 +104,17 @@ CMoney CDoc::giveToBank(quint8 pNu, CMoney sum)
             if (! p->money.positive())
                 p->mustSellMode = true;
             return sum;
-        } else {
+        } else if (p->pbp == 0) {
             p->money += cap;
             emit sendLog(plName + tr(" платит только ") + cap.toString());
             sellAll(pNu);
             p->active = false;
             emit sendLog(plName + tr(" выходит из игры"));
             return cap;
+        } else {
+            p->pbp--;
+            emit sendLog(plName + tr(" атоматически использует ПБ и не платит ") + sum.toString());
+            return sum;
         }
     } else {
         emit sendLog(plName + tr(" не платит ") + sum.toString() + tr(" из-за секвестра"));
@@ -155,7 +159,7 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
         if (! fp->money.positive())
             fp->mustSellMode = true;
         return sum;
-    } else {
+    } else  if (fp->pbp == 0) {
         fp->money -= cap;
         tp->money += cap;
         emit sendLog(fromPlName + tr(" платит ")+ toPlName + tr(" только ") + cap.toString());
@@ -163,6 +167,73 @@ CMoney CDoc::transferMoney(quint8 fromPl, quint8 toPl, CMoney sum)
         fp->active = false;
         emit sendLog(fromPlName + tr(" выходит из игры"));
         return cap;
+    } else {
+        fp->pbp--;
+        emit sendLog(fromPlName + tr(" автоматически использует ПБ и не платит ")+ toPlName + tr(" ") + sum.toString());
+        return sum;
+    }
+}
+
+CMoney CDoc::transferMoneyToAll(quint8 fromPl, CMoney sum)
+{
+    CPlayer *fp = &m_p[fromPl];
+    QString fromPlName = fp->name;
+
+    if (fp->seq > 0) {
+        emit sendLog(fromPlName + tr(" не платит ") + tr(" никому по ") + sum.toString() + tr(" из-за секвестра"));
+        return sum;
+    }
+
+    QList<quint8> l;
+    for (quint8 i=0; i<nu_Players; i++) {
+        if (i != fromPl) {
+            CPlayer *tp = &m_p[i];
+            QString toPlName = tp->name;
+
+            if (tp->seq > 0 && tp->active) {
+                emit sendLog(toPlName + tr(" не получает от ") + fromPlName + tr(" ") + sum.toString() + tr(" из-за секвестра"));
+                return sum;
+            }
+
+            if (tp->active)
+                l << i;
+        }
+    }
+
+    CMoney sumAll = sum * l.size();
+    CMoney cap = playerCapital(fromPl);
+    if (sumAll <= cap) {
+        foreach (quint8 i, l) {
+            CPlayer *tp = &m_p[i];
+            QString toPlName = tp->name;
+
+            fp->money -= sum;
+            tp->money += sum;
+            emit sendLog(fromPlName + tr(" платит ") + toPlName + tr(" ") + sum.toString());
+        }
+        fp->lastPay.set(l, sum);
+        if (! fp->money.positive())
+            fp->mustSellMode = true;
+        return sum;
+    } else  if (fp->pbp == 0) {
+        CMoney d = cap / l.size();
+        foreach (quint8 i, l) {
+            CPlayer *tp = &m_p[i];
+            QString toPlName = tp->name;
+
+            fp->money -= d;
+            tp->money += d;
+            emit sendLog(fromPlName + tr(" платит ")+ toPlName + tr(" только ") + d.toString());
+        }
+
+        sellAll(fromPl);
+        fp->active = false;
+        emit sendLog(fromPlName + tr(" выходит из игры"));
+        return d;
+    } else {
+        fp->pbp--;
+        emit sendLog(fromPlName + tr(" автоматически использует ПБ и не платит никому ")+ sum.toString());
+        return sum;
     }
 }
 
@@ -815,6 +886,7 @@ bool CDoc::takeFirm(int owner, int fNu)
         return false;
     }
 
+    qDebug() << tr("CDoc::takeFirm");
     CMoney inc = f->GetCurIncome();
     p->money += inc;
     p->investComplit = true;

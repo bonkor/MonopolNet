@@ -67,6 +67,11 @@ void CMoney::mul(qint8 m)
     cents *= m;
 }
 
+void CMoney::div(qint8 m)
+{
+    cents /= m;
+}
+
 CMoney & CMoney::operator+= (const CMoney & s)
 {
     add(s);
@@ -103,6 +108,14 @@ const CMoney & operator* (const CMoney & s1, const qint8 & m)
     CMoney s;
     s.add(s1);
     s.mul(m);
+    return CMoney(s);
+}
+
+const CMoney & operator/ (const CMoney & s1, const qint8 & m)
+{
+    CMoney s;
+    s.add(s1);
+    s.div(m);
     return CMoney(s);
 }
 

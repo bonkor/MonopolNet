@@ -1,5 +1,36 @@
 #include "cplayer.h"
 
+CLP::CLP()
+{
+    pls << 1; pls.clear();
+}
+
+void CLP::clear(void)
+{
+    pls.clear();
+}
+
+bool CLP::exist(void)
+{
+    if (pls.isEmpty())
+        return false;
+    else
+        return true;
+}
+
+void CLP::set(quint8 p, CMoney s)
+{
+    pls.clear();
+    pls << p;
+    sum = s;
+}
+
+void CLP::set(QList<quint8> &l, CMoney s)
+{
+    pls = l;
+    sum = s;
+}
+
 CPlayer::CPlayer(QObject *parent) :
     QObject(parent)
 {
@@ -17,7 +48,7 @@ CPlayer::CPlayer(QObject *parent) :
     mustLoseMonQues = false;
     mustLoseMeson = false;
 
-    pbp = 0;
+    pbp = 5;
     pbq = 0;
     turnToStart = 0;
     plusStart = 0;

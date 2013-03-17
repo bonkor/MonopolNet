@@ -193,7 +193,7 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
 
     pbp = new QPushButton(main);
     pbp->setText(tr("Отказаться от платежа"));
-    pbp->move(590, 347);
+    pbp->move(590, 373);
     pbp->setDisabled(false);
     pbp->hide();
 
@@ -236,7 +236,7 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
                      this, SLOT(EOMPressed()));
     QObject::connect(pbp, SIGNAL(clicked()),
                      this, SLOT(PBPPressed()));
-    updateInfo();
+//    updateInfo();
 }
 
 MonScene::~MonScene()
@@ -244,6 +244,7 @@ MonScene::~MonScene()
     delete doc;
     delete fvp;
     delete qPane;
+    delete fPane;
     delete endTurn;
     delete endMode;
     delete pbp;
@@ -490,6 +491,7 @@ void MonScene::setScenePlayer(int pl)
     fvp->hide();
     pbp->hide();
     endTurn->setStyleSheet("background: " + PlColor[pl].name());
+    updateInfo();
 }
 
 void MonScene::addToLog(QString str)
