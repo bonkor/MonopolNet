@@ -337,7 +337,7 @@ bool CDoc::inBetween(quint8 pos)
             else
                 return false;
         } else if (pPos <= 52) {
-            if (pos > pPos && pos < 52)
+            if (pos > pPos && pos <= 52)
                 return true;
             else
                 return false;
@@ -600,15 +600,18 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     CPlayer *p = &m_p[pNu];
     QString plName = p->name;
 
-    if (canTake(pNu, pos))
-        takeFirm(pNu, pos);
-
     quint8 oldPos = p->pos;
     quint8 newPos;
     if (pos == -1)
         newPos = calculateNextPos(pNu, st);
     else
         newPos = pos;
+
+    qDebug() << tr("CDoc::go");
+    if (canTake(pNu, oldPos)) {
+        qDebug() << tr("canTake - true");
+        takeFirm(pNu, oldPos);
+    }
 
     qDebug() << "go" << pNu << "-" << st << "-" << pos << " || " << oldPos << "-" << newPos;
     p->pos = newPos;
@@ -757,6 +760,19 @@ bool CDoc::go(quint8 pNu, quint8 st, int pos)
     return res;
 }
 
+bool CDoc::isFirmOwner(quint8 player, quint8 fNu)
+{
+    CPlayer *p = &m_p[player];
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != player)
+        return false;
+
+    return true;
+}
+
 bool CDoc::canBuy(quint8 player, quint8 fNu)
 {
     CPlayer *p = &m_p[player];
@@ -842,6 +858,7 @@ bool CDoc::canTake(quint8 player, quint8 fNu)
     CPlayer *p = &m_p[player];
     CFirm *f = &m_f[fNu];
 
+    qDebug() <<tr("CDoc::canTake");
     if (f->m_type != F_Firm)
         return false;
     if (f->owner != player)

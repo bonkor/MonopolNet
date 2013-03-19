@@ -13,6 +13,7 @@ public:
     CFirm *getFirm(quint8 fNu);
     quint8 getActivePlayers(void);
     quint8 getNextPlayer(int skip);
+    bool isFirmOwner(quint8 player, quint8 fNu);
     bool canBuy(quint8 player, quint8 fNu);
     bool canSell(quint8 player, quint8 fNu);
     bool canInvest(quint8 player, quint8 fNu);

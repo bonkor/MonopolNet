@@ -259,7 +259,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-    pair.first = 2; pair.second = 4;
+//    pair.first = 2; pair.second = 4;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -585,6 +585,11 @@ void CControl::startMove(void)
     case Q_Sell:
         if (doc.playerOwnerCount(doc.curPl) == 0) {
             emit sendToLog(cplp->name + tr(" не имеет фирм"));
+            startMove();
+            return;
+        }
+        if (cplp->seq > 0) {
+            emit sendToLog(cplp->name + tr(" не может продавать из-за секвестра"));
             startMove();
             return;
         }

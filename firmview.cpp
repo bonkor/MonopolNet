@@ -140,7 +140,7 @@ void FirmView::setButtonsState(void)
             br->setDisabled(false);
         else
             br->setDisabled(true);
-        if (doc->canSell(curPl, nu)) {
+        if ((doc->m_p[curPl].mustLoseQues && doc->isFirmOwner(curPl, nu)) || doc->canSell(curPl, nu)) {
             bc1->hide();
             bc2->setDisabled(false);
             bc2->show();
