@@ -30,6 +30,7 @@ signals:
     void askLose(int fPu);
     void askLoseMon(int fPu);
     void askLoseMezon(int fPu);
+    void askChange(int fPu);
     void askStayTT(int fPu);
     void askSellSomething(int fPu);
     void askQuestion(int fPu);
@@ -44,6 +45,7 @@ public slots:
     void endGame(quint8 pNu);
     void startTurn(quint8 pNu);
     void startMove(void);
+    void tryChangeFirm(int pl, int fNu, int tNu);
     void tryInvestFirm(int pl, int fNu, int flNu = 0);
     void tryTakeFirm(int pl, int fNu);
     void tryLoseMezon(int pl, int fNu);

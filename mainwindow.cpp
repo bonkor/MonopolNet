@@ -52,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      scene, SLOT(askLoseMon(int)));
     QObject::connect(ctrl, SIGNAL(askLoseMezon(int)),
                      scene, SLOT(askLoseMezon(int)));
+    QObject::connect(ctrl, SIGNAL(askChange(int)),
+                     scene, SLOT(askChange(int)));
     QObject::connect(ctrl, SIGNAL(askMoveToPirefiric(int)),
                      scene, SLOT(askMoveToPireferic(int)));
     QObject::connect(ctrl, SIGNAL(askMoveToCrest(int)),
@@ -59,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ctrl, SIGNAL(askMoveBetween(int)),
                      scene, SLOT(askMoveBetween(int)));
 
+    QObject::connect(scene, SIGNAL(pressedChangeFirm(int,int,int)),
+                     ctrl, SLOT(tryChangeFirm(int,int,int)));
     QObject::connect(scene, SIGNAL(pressedInvestFirm(int,int,int)),
                      ctrl, SLOT(tryInvestFirm(int,int,int)));
     QObject::connect(scene, SIGNAL(pressedTakeFirm(int,int)),

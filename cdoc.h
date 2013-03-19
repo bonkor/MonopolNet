@@ -16,8 +16,11 @@ public:
     bool isFirmOwner(quint8 player, quint8 fNu);
     bool canBuy(quint8 player, quint8 fNu);
     bool canSell(quint8 player, quint8 fNu);
+    bool canLose(quint8 player, quint8 fNu);
     bool canInvest(quint8 player, quint8 fNu);
     bool canTake(quint8 player, quint8 fNu);
+    bool canChangeTo(quint8 player, quint8 fNu);
+    bool canChangeFrom(quint8 player, quint8 fNu, quint8 tNu);
     CPlayer *getCurPlayer(void);
     quint8 getDir(void);
     bool inCrest(quint8 pos);
@@ -32,6 +35,8 @@ public:
     quint8 playersAtPoleExept(quint8 pNu, quint8 pos);
     CMoney playerSumCount(quint8 pNu);
     CMoney playerCapital(quint8 pNu);
+    CFirm *playerExpensiveFirm(quint8 pNu);
+    CFirm *cheapestFreeFirm(quint8 pNu);
     CMoney giveToBank(quint8 pNu, CMoney sum);
     void takeFromBank(quint8 pNu, CMoney sum);
     CMoney transferMoney(quint8 fromPl, quint8 toPl, CMoney sum);
@@ -58,6 +63,7 @@ public slots:
     bool loseFirm(int oldOwner, int fNu);
     bool investFirm(int owner, int fNu, int flNu);
     bool takeFirm(int owner, int fNu);
+    bool changeFirm(int owner, int fNu, int tNu);
     bool setCurPlayer(int pNu);
 };
 

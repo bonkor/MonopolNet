@@ -567,7 +567,7 @@ void MonScene::showFirm(int fNu, QPointF point)
         if (pointY + Firm_Height >= sceneHeight)
             pointY -= Firm_Height;
         fvp->move(QPointF(pointX, pointY).toPoint());
-        fvp->showFirm(fNu, scenePlayer, showFirmMode);
+        fvp->showFirm(fNu, scenePlayer, showFirmMode, changingFirm);
     }
 }
 
@@ -627,22 +627,30 @@ void MonScene::investFirm(int fNu)
 
 void MonScene::buyFirm(int fNu)
 {
-    quint8 t = doc->m_f[fNu].type;
     QString name = doc->m_f[fNu].name;
-    showFirmType = 0;
-    if (t == 0)
-        emit pressedBuyFirm(scenePlayer, fNu, 0);
-    else if (t == 1) {
+    if (showFirmMode != MF_CHANGE_START) {
+        quint8 t = doc->m_f[fNu].type;
+        showFirmType = 0;
+        if (t == 0)
+            emit pressedBuyFirm(scenePlayer, fNu, 0);
+        else if (t == 1) {
+            fvp->hide();
+            addToLog(tr("Вы хотите купить ") + name + tr(". Откажитесь от любой фирмы."));
+            showFirmMode = MF_LOSE_FIRM;
+            buyingFirm = fNu;
+            endMode->show();
+        } else if (t == 2) {
+            fvp->hide();
+            addToLog(tr("Вы хотите купить ") + name + tr(". Откажитесь от любой фирмы из монополии."));
+            showFirmMode = MF_LOSE_MON;
+            buyingFirm = fNu;
+            endMode->show();
+        }
+    } else {
         fvp->hide();
-        addToLog(tr("Вы хотите купить ") + name + tr(". Откажитесь от любой фирмы."));
-        showFirmMode = MF_LOSE_FIRM;
-        buyingFirm = fNu;
-        endMode->show();
-    } else if (t == 2) {
-        fvp->hide();
-        addToLog(tr("Вы хотите купить ") + name + tr(". Откажитесь от любой фирмы из монополии."));
-        showFirmMode = MF_LOSE_MON;
-        buyingFirm = fNu;
+        addToLog(tr("Вы хотите получить ") + name + tr(". Откажитесь от любой фирмы не дешевле ") + doc->m_f[fNu].price.toString());
+        showFirmMode = MF_CHANGE_END;
+        changingFirm = fNu;
         endMode->show();
     }
 }
@@ -656,14 +664,25 @@ void MonScene::loseMezon(int fNu)
 void MonScene::sellFirm(int fNu)
 {
     qDebug("showFirmMode: %d", showFirmMode);
-    if (showFirmMode == MF_NO || showFirmMode == MF_NO_LM) {
+    switch (showFirmMode) {
+    case MF_NO:
+    case MF_NO_LM:
         emit pressedSellFirm(scenePlayer, fNu);
-    } else if (showFirmMode == MF_LOSE_FIRM || showFirmMode == MF_LOSE_MON) {
+        break;
+    case MF_LOSE_FIRM:
+    case MF_LOSE_MON:
         if (showFirmType == 0)
             emit pressedBuyFirm(scenePlayer, buyingFirm, fNu);
         else if (showFirmType == 1)
             emit pressedInvestFirm(scenePlayer, buyingFirm, fNu);
+        break;
+    case MF_CHANGE_END:
+        showFirmMode = MF_NO;
+        emit pressedChangeFirm(scenePlayer, fNu, changingFirm);
+        showFirm(changingFirm);
+        break;
     }
+
     hideEndMode();
 }
 
@@ -802,6 +821,17 @@ void MonScene::askLoseMezon(int pl)
     cubik->setEnabled(false);
     endTurn->setEnabled(false);
     addToLog(tr("Снимите мезон с любой фирмы"));
+}
+
+void MonScene::askChange(int pl)
+{
+    if (pl != scenePlayer)
+        return;
+
+    showFirmMode = MF_CHANGE_START;
+    cubik->setEnabled(false);
+    endTurn->setEnabled(false);
+    addToLog(tr("Выберете фирму, которую хотите получить не дороже ") + doc->playerExpensiveFirm(scenePlayer)->price.toString());
 }
 
 void MonScene::askSellSomething(int pl)
@@ -971,8 +1001,14 @@ void MonScene::clearDirBut(quint8 exept)
 
 void MonScene::hideEndMode(void)
 {
+    qDebug() << tr("showFirmMode: ") << showFirmMode;
     endMode->hide();
-    showFirmMode = MF_NO;
+    if (showFirmMode != MF_CHANGE_END)
+        showFirmMode = MF_NO;
+    else {
+        showFirmMode = MF_CHANGE_START;
+        addToLog(tr("Выберете фирму, которую хотите получить не дороже ") + doc->playerExpensiveFirm(scenePlayer)->price.toString());
+    }
 }
 
 void MonScene::leftPressed(void)
@@ -1067,8 +1103,7 @@ void MonScene::EOTPressed(void)
 
 void MonScene::EOMPressed(void)
 {
-    showFirmMode = MF_NO;
-    endMode->hide();
+    hideEndMode();
 }
 
 void MonScene::PBPPressed(void)

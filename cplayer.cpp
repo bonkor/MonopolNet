@@ -46,6 +46,7 @@ CPlayer::CPlayer(QObject *parent) :
     mustSellQues = false;
     mustLoseQues = false;
     mustLoseMonQues = false;
+    mustChangeQues = false;
     mustLoseMeson = false;
 
     pbp = 0;

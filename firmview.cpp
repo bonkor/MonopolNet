@@ -74,11 +74,12 @@ FirmView::~FirmView()
     delete br;
 }
 
-void FirmView::showFirm(int fNu, quint8 pl, quint8 m)
+void FirmView::showFirm(int fNu, quint8 pl, quint8 m, quint8 tFNu)
 {
     nu = fNu;
     curPl = pl;
     mode = m;
+    toFirm = tFNu;
     fp = doc->getFirm(nu);
     if (fp->m_type != F_Firm)
         return;
@@ -203,6 +204,42 @@ void FirmView::setButtonsState(void)
         bc2->hide();
         bc1->show();
         bc1->setDisabled(true);
+        break;
+    case MF_CHANGE_START:
+        blm->hide();
+        bl->show();
+        bl->setDisabled(true);
+        br->setDisabled(true);
+        if (doc->canLose(curPl, nu)) {
+            bc1->hide();
+            bc2->show();
+            bc2->setDisabled(true);
+        } else {
+            bc2->hide();
+            bc1->show();
+            if (doc->canChangeTo(curPl, nu))
+                bc1->setDisabled(false);
+            else
+                bc1->setDisabled(true);
+        }
+        break;
+    case MF_CHANGE_END:
+        blm->hide();
+        bl->show();
+        bl->setDisabled(true);
+        br->setDisabled(true);
+        if (doc->canLose(curPl, nu)) {
+            bc1->hide();
+            bc2->show();
+            if (doc->canChangeFrom(curPl, nu, toFirm))
+                bc2->setDisabled(false);
+            else
+                bc2->setDisabled(true);
+        } else {
+            bc2->hide();
+            bc1->show();
+            bc1->setDisabled(true);
+        }
         break;
     }
 

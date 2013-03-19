@@ -90,6 +90,20 @@ void CControl::tryBuyFirm(int pl, int fNu, int flNu)
     }
 }
 
+void CControl::tryChangeFirm(int pl, int fNu, int tNu)
+{
+    doc.clearLastPay(pl);
+    CPlayer *plp = &doc.m_p[pl];
+
+    if (plp->mustChangeQues) {
+        if (doc.changeFirm(pl, fNu, tNu)) {
+            plp->mustChangeQues = false;
+            emit docChanged();
+            startMove();
+        }
+    }
+}
+
 void CControl::trySellFirm(int pl, int fNu)
 {
     CPlayer *plp = &doc.m_p[pl];
@@ -259,7 +273,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-//    pair.first = 2; pair.second = 4;
+    pair.first = 6; pair.second = 5;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -412,7 +426,9 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил '5 ходов сервестра'"));
         cplp->seq += 5;
     } else if (pair.first == 6 && pair.second == 5) {
-
+        // change
+        emit sendToLog(name + tr(" выбросил 'Поменяй'"));
+        cplp->insertToQueue(Q_Change);
     } else if (pair.first == 6 && pair.second == 6) {
         // от всех по 15
         emit sendToLog(name + tr(" выбросил 'От всех по 15'"));
@@ -622,6 +638,16 @@ void CControl::startMove(void)
         }
         cplp->mustLoseMeson = true;
         emit askLoseMezon(doc.curPl);
+        break;
+    case Q_Change:
+        if (doc.playerExpensiveFirm(doc.curPl) == 0 || doc.cheapestFreeFirm(doc.curPl) == 0 ||
+                doc.playerExpensiveFirm(doc.curPl)->price <= doc.cheapestFreeFirm(doc.curPl)->price) {
+            emit sendToLog(cplp->name + tr(" не имеет фирм для обмена"));
+            startMove();
+            return;
+        }
+        cplp->mustChangeQues = true;
+        emit askChange(doc.curPl);
         break;
     case Q_Move_Perefiric:
         cplp->mustGoPireferic = true;

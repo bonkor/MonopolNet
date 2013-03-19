@@ -54,6 +54,7 @@ private:
     quint8 showFirmMode;    // мода показа карточки фирмы (обычный, при отказе от фирмы/монополии и т.д)
     quint8 showFirmType;    // 0 - buy 1 - invest
     quint8 buyingFirm;      // фирма, с типом != 0 которую собираемся купить или инвестировать
+    quint8 changingFirm;    // фирма, на которую собираемся сменять свою фирму
     quint8 mode;            // мода. 0 - обычная 1 - вопрос (перывый бросок кубика) 2 - второй бросок
     quint8 cubik1;          // значение первого броска после моды 1
 
@@ -81,6 +82,7 @@ protected:
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
 signals:
+    void pressedChangeFirm(int pl, int fNu, int tNu);
     void pressedInvestFirm(int pl, int fNu, int flNu);
     void pressedTakeFirm(int pl, int fNu);
     void pressedLoseMezon(int pl, int fNu);
@@ -109,6 +111,7 @@ public slots:
     void askLose(int pl);
     void askLoseMon(int pl);
     void askLoseMezon(int pl);
+    void askChange(int pl);
     void askSellSomething(int pl);
     void askQuestion(int pl);
     void askMoveToPireferic(int player);

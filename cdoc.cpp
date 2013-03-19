@@ -90,6 +90,51 @@ CFirm *CDoc::getFirm(quint8 fNu)
     return &m_f[fNu];
 }
 
+CFirm *CDoc::playerExpensiveFirm(quint8 pNu)
+{
+    CPlayer *p = &m_p[pNu];
+
+    if (p->hash.size() == 0)
+        return 0;
+
+    CMoney hiestPrice = 0;
+    quint8 fNu = 0;
+    foreach (quint8 fn, p->hash.keys()) {
+        CMoney price = p->hash.value(fn)->price;
+        if (price > hiestPrice) {
+            hiestPrice = price;
+            fNu = fn;
+        }
+    }
+    return p->hash.value(fNu);
+}
+
+// возвращает самую дешевую свободную фирму, на которой нет игроков кроме pNu
+CFirm *CDoc::cheapestFreeFirm(quint8 pNu)
+{
+    CMoney lowestPrice = 100;
+    quint8 fNu = 0;
+    for (quint8 i=0; i<57; i++) {
+        CFirm *f = &m_f[i];
+        if (f->m_type == F_Firm && f->owner == 4 && f->price < lowestPrice) {
+            bool res = true;
+            for (quint8 j=0; j<nu_Players; j++) {
+                if (j != pNu && m_p[j].active && m_p[j].pos == i)
+                    res = false;
+            }
+            if (res) {
+                lowestPrice = f->price;
+                fNu = i;
+            }
+        }
+    }
+
+    if (fNu == 0)
+        return 0;
+    else
+        return &m_f[fNu];
+}
+
 CMoney CDoc::giveToBank(quint8 pNu, CMoney sum)
 {
     CPlayer *p = &m_p[pNu];
@@ -815,6 +860,19 @@ bool CDoc::canSell(quint8 player, quint8 fNu)
     return true;
 }
 
+bool CDoc::canLose(quint8 player, quint8 fNu)
+{
+    CPlayer *p = &m_p[player];
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != player)
+        return false;
+
+    return true;
+}
+
 bool CDoc::canInvest(quint8 player, quint8 fNu)
 {
     CPlayer *p = &m_p[player];
@@ -868,6 +926,36 @@ bool CDoc::canTake(quint8 player, quint8 fNu)
     if (p->seq > 0)
         return false;
     if (p->investComplit)
+        return false;
+
+    return true;
+}
+
+bool CDoc::canChangeTo(quint8 player, quint8 fNu)
+{
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != 4)
+        return false;
+    if (playersAtPoleExept(player, fNu) != 0)
+        return false;
+    if (f->price >= playerExpensiveFirm(player)->price)
+        return false;
+
+    return true;
+}
+
+bool CDoc::canChangeFrom(quint8 player, quint8 fNu, quint8 tNu)
+{
+    CFirm *f = &m_f[fNu];
+
+    if (f->m_type != F_Firm)
+        return false;
+    if (f->owner != player)
+        return false;
+    if (f->price <= m_f[tNu].price)
         return false;
 
     return true;
@@ -959,6 +1047,45 @@ bool CDoc::loseFirm(int oldOwner, int fNu)
             mn->owner = 4;
             p->listMon.removeAll(mn);
             emit sendLog(p->name + tr(" теряет контроль над монополией ") + mn->name);
+        }
+    }
+    return true;
+}
+
+bool CDoc::changeFirm(int owner, int fNu, int tNu)
+{
+    if (! canChangeTo(owner, tNu))
+        return false;
+    if (! canChangeFrom(owner, fNu, tNu))
+        return false;
+
+    if (! loseFirm(owner, fNu))
+        return false;
+
+    CPlayer *p = &m_p[owner];
+    CFirm *ff = &m_f[fNu];
+    CFirm *tf = &m_f[tNu];
+    QString plName = p->name;
+    QString fName = ff->name;
+    QString tName = tf->name;
+
+    tf->owner = owner;
+    p->investComplit = true;
+    emit sendLog(plName + tr(" меняет ") + fName + tr(" на ") + tName);
+
+    p->hash.insert(tNu, tf);
+
+    foreach (CMonopol *mn, tf->listMon) {
+        bool res = true;
+        foreach (CFirm *fm, mn->list) {
+            qDebug() << mn->name << fm->name <<fm->owner << owner << res;
+            if (fm->owner != owner)
+                res = false;
+        }
+        if (res) {
+            mn->owner = owner;
+            p->listMon.append(mn);
+            emit sendLog(plName + tr(" приобретает контроль над монополией ") + mn->name);
         }
     }
     return true;

@@ -15,6 +15,7 @@ enum QueueType
     Q_Move_Perefiric,   // переместиться на перефирию
     Q_Move_Crest,       // переместиться на перефирию
     Q_Move_Between,     // переместиться между фишкой и стартом
+    Q_Change,   // обмен фирмы после вопроса
     Q_Sell,     // продажа после вопроса
     Q_LoseMon,  // потеря моноп. после вопроса
     Q_Lose,     // потеря после вопроса
@@ -56,6 +57,7 @@ public:
     bool mustSellQues;  // должен что то продать после вопроса
     bool mustLoseQues;  // должен что то потерять после вопроса
     bool mustLoseMonQues;  // должен потерять монополию после вопроса
+    bool mustChangeQues;// должен поменять фирму после вопроса
     bool mustLoseMeson; // должен снять мезон после вопроса
     bool mustGoPireferic; // должен перейти на перефирию
     bool mustGoCrest;   // должен перейти на крест
