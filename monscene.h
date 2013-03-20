@@ -112,6 +112,7 @@ public slots:
     void askLoseMon(int pl);
     void askLoseMezon(int pl);
     void askChange(int pl);
+    void askChoose(int pl);
     void askSellSomething(int pl);
     void askQuestion(int pl);
     void askMoveToPireferic(int player);

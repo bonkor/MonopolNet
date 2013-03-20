@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      scene, SLOT(askMoveToCrest(int)));
     QObject::connect(ctrl, SIGNAL(askMoveBetween(int)),
                      scene, SLOT(askMoveBetween(int)));
+    QObject::connect(ctrl, SIGNAL(askChoose(int)),
+                     scene, SLOT(askChoose(int)));
 
     QObject::connect(scene, SIGNAL(pressedChangeFirm(int,int,int)),
                      ctrl, SLOT(tryChangeFirm(int,int,int)));

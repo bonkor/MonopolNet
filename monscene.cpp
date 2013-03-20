@@ -211,7 +211,8 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
     fvp->hide();
 
     qPane = new CQPane(main, Qt::FramelessWindowHint);
-    qPane->hide();
+//    qPane->hide();
+    qPane->setToChooseMode();
 
     fPane = new CFirmsPane(main, Qt::FramelessWindowHint);
     fPane->init(doc);
@@ -399,10 +400,6 @@ void MonScene::showScore(void)
         p.setFont(fn);
         p.setPen(PlColor[i]);
         QString tmpStr, stateStr1, stateStr2, stateStr3;
-        if (pl->seq > 0) {
-            tmpStr.setNum(pl->seq);
-            stateStr1 += tr(" Сек: ") + tmpStr;
-        }
         if (pl->pbp > 0) {
             tmpStr.setNum(pl->pbp);
             stateStr1 += tr(" ПБ: ") + tmpStr;
@@ -414,6 +411,10 @@ void MonScene::showScore(void)
         if (pl->turnToStart > 0) {
             tmpStr.setNum(pl->turnToStart);
             stateStr2 += tr(" Св.к.старту: ") + tmpStr;
+        }
+        if (pl->seq > 0) {
+            tmpStr.setNum(pl->seq);
+            stateStr3 += tr(" Сек: ") + tmpStr;
         }
         if (pl->plusStart != 0) {
             tmpStr.setNum(abs(pl->plusStart));
@@ -440,7 +441,7 @@ void MonScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             if (t == F_Firm) {
                 showFirm(a, mouseEvent->scenePos());
                 qPane->hide();
-            } else if ((t == F_3Ques || t == F_Ques) && doc->m_p[scenePlayer].pos == a) {
+            } else if (t == F_3Ques || t == F_Ques) {
                 fvp->hide();
                 qPane->show();
             } else {
@@ -894,6 +895,14 @@ void MonScene::askMoveBetween(int player)
         if (doc->inBetween(i))
             field[i]->setOpacity(.5);
     pl[player]->setCursor(Qt::PointingHandCursor);
+}
+
+void MonScene::askChoose(int pl)
+{
+    if (pl != scenePlayer)
+        return;
+
+    addToLog(tr("Выберите любой из ответов"));
 }
 
 #define HZ_SHIFT 2

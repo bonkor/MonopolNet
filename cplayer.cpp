@@ -49,8 +49,9 @@ CPlayer::CPlayer(QObject *parent) :
     mustChangeQues = false;
     mustLoseMeson = false;
 
+    seq = 0;
     pbp = 0;
-    pbq = 0;
+    pbq = 5;
     turnToStart = 0;
     plusStart = 0;
     stepsBack = 0;

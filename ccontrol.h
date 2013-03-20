@@ -31,6 +31,7 @@ signals:
     void askLoseMon(int fPu);
     void askLoseMezon(int fPu);
     void askChange(int fPu);
+    void askChoose(int fPu);
     void askStayTT(int fPu);
     void askSellSomething(int fPu);
     void askQuestion(int fPu);

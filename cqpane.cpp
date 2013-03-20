@@ -1,4 +1,7 @@
+#include <QDebug>
+#include <QApplication>
 #include <QPainter>
+#include <QTime>
 #include <QMouseEvent>
 #include "cqpane.h"
 
@@ -11,9 +14,11 @@ quint16 QPaneHeight = 231;
 #define PW 43
 #define PH 27
 
-CQField::CQField(QWidget *parent, Qt::WindowFlags f) :
+CQField::CQField(QWidget *parent, Qt::WindowFlags f, quint8 r, quint8 c) :
     QWidget(parent, f)
 {
+    row = r;
+    col = c;
     setFixedSize(FW, FH);
 }
 
@@ -26,6 +31,36 @@ void CQField::setPict(QImage i)
 void CQField::setSelected(bool s)
 {
     selected = s;
+}
+
+void CQField::setToOrdinadyMode(void)
+{
+    mode = QP_ORD;
+    selected = false;
+}
+
+void CQField::setToChooseMode(void)
+{
+    mode = QP_CHOOSE;
+    selected = false;
+}
+
+void CQField::enterEvent(QEvent *event)
+{
+//    qDebug() << tr("CQField::enterEvent");
+    if (mode == QP_CHOOSE) {
+        selected = true;
+        update();
+    }
+}
+
+void CQField::leaveEvent(QEvent *event)
+{
+//    qDebug() << tr("CQField::leaveEvent");
+    if (mode == QP_CHOOSE) {
+        selected = false;
+        update();
+    }
 }
 
 void CQField::paintEvent(QPaintEvent *event)
@@ -41,6 +76,24 @@ void CQField::paintEvent(QPaintEvent *event)
     p.drawImage(4, 4, innerPict);
 }
 
+void CQField::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton && mode == QP_CHOOSE) {
+        mousePressPoint = event->globalPos();
+    }
+    QWidget::mousePressEvent(event);
+}
+
+void CQField::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton && mode == QP_CHOOSE) {
+        QPoint p = event->globalPos() - mousePressPoint;
+        if (p.manhattanLength() < QApplication::startDragDistance())
+            emit choose(row, col);
+    }
+    QWidget::mouseReleaseEvent(event);
+}
+
 QImage CQField::makeTranparant(QImage src)
 {
     QImage mask = src.createMaskFromColor(0xffc0c0c0, Qt::MaskOutColor);
@@ -52,11 +105,15 @@ QImage CQField::makeTranparant(QImage src)
 CQPane::CQPane(QWidget *parent, Qt::WindowFlags f) :
     CMoveWidget(parent, f)
 {
+    mode = QP_ORD;
     setFixedSize(QPaneWidth, QPaneHeight);
     move(50, 50);
     for (int i=0; i<6; i++)
-        for (int j=0; j<6; j++)
-            Field[i][j] = new CQField(this, Qt::FramelessWindowHint);
+        for (int j=0; j<6; j++) {
+            Field[i][j] = new CQField(this, Qt::FramelessWindowHint, i + 1, j + 1);
+            QObject::connect(Field[i][j], SIGNAL(choose(int,int)),
+                             this, SLOT(choosePriv(int,int)));
+        }
     preparePics();
 
     Field[0][0]->setToolTip(tr("+10"));
@@ -110,6 +167,31 @@ CQPane::~CQPane()
             delete Field[i][j];
 }
 
+void CQPane::choosePriv(int r, int c)
+{
+    if (mode == QP_CHOOSE) {
+        setToOrdinadyMode();
+        emit choose(r, c);
+        selectPos(r, c);
+    }
+}
+
+void CQPane::setToOrdinadyMode(void)
+{
+    mode = QP_ORD;
+    for (int i=0; i<6; i++)
+        for (int j=0; j<6; j++)
+            Field[i][j]->setToOrdinadyMode();
+}
+
+void CQPane::setToChooseMode(void)
+{
+    mode = QP_CHOOSE;
+    for (int i=0; i<6; i++)
+        for (int j=0; j<6; j++)
+            Field[i][j]->setToChooseMode();
+}
+
 void CQPane::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
@@ -148,4 +230,8 @@ void CQPane::selectPos(quint8 r, quint8 c)
     clear();
     Field[r - 1][c - 1]->setSelected(true);
     update();
+
+    QTime dieTime=QTime::currentTime().addMSecs(300);
+    while(QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
 }

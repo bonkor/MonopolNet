@@ -15,6 +15,7 @@ enum QueueType
     Q_Move_Perefiric,   // переместиться на перефирию
     Q_Move_Crest,       // переместиться на перефирию
     Q_Move_Between,     // переместиться между фишкой и стартом
+    Q_Choose,   // выбор вопроса
     Q_Change,   // обмен фирмы после вопроса
     Q_Sell,     // продажа после вопроса
     Q_LoseMon,  // потеря моноп. после вопроса
@@ -62,6 +63,7 @@ public:
     bool mustGoPireferic; // должен перейти на перефирию
     bool mustGoCrest;   // должен перейти на крест
     bool mustGoBetween; // должен перейти между фишкой и стартом
+    bool mustChoose;    // должен выбрать в вопросах
     quint8 pbp;         // кол-во ПБ-шек на платеж
     quint8 pbq;         // кол-во ПБ-шек на вопрошалку
     quint8 turnToStart; // свернуть к старту

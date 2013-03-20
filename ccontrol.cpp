@@ -273,7 +273,7 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 {
     qDebug() << pair.first << pair.second;
 
-    pair.first = 6; pair.second = 5;
+    pair.first = 6; pair.second = 1;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -412,7 +412,9 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         emit sendToLog(name + tr(" выбросил 'Всем по 15'"));
         doc.transferMoneyToAll(pl, 15);
     } else if (pair.first == 6 && pair.second == 1) {
-
+        // choose
+        emit sendToLog(name + tr(" выбросил 'Выбери среди вопросов'"));
+        cplp->insertToQueue(Q_Choose);
     } else if (pair.first == 6 && pair.second == 2) {
         // -st
         emit sendToLog(name + tr(" выбросил 'Не получать +25 при проходе через СТАРТ'"));
@@ -660,6 +662,10 @@ void CControl::startMove(void)
     case Q_Move_Between:
         cplp->mustGoBetween = true;
         emit askMoveBetween(doc.curPl);
+        break;
+    case Q_Choose:
+        cplp->mustChoose = true;
+        emit askChoose(doc.curPl);
         break;
     }
 }
