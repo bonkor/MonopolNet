@@ -26,8 +26,10 @@ private:
     bool header;
     quint8 fNu;
     quint8 owner;
+    QPoint mousePressPoint;
 
 protected:
+    virtual void mousePressEvent(QMouseEvent * event);
     virtual void mouseReleaseEvent(QMouseEvent * event);
 
 signals:

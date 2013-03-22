@@ -13,9 +13,12 @@ public:
 
 private:
     CDoc doc;
+    QPair<quint8,quint8> lastQuestion;
 
     void movePlayer(quint8 st, int pos = -1);
-    
+    bool checkQuestionPositive(QPair<quint8,quint8> pair);
+    QString questionName(QPair<quint8,quint8> pair);
+
 signals:
     void sendToLog(QString);
     void changeScenePlayer(int pl);
@@ -38,6 +41,7 @@ signals:
     void askMoveToPirefiric(int fPu);
     void askMoveToCrest(int fPu);
     void askMoveBetween(int fPu);
+    void askQuestionPB(int fPu);
     void enaEndOfTurn(int fPu);
     void disEndOfTurn(int fPu);
     void disCubik(int fPu);
@@ -55,12 +59,14 @@ public slots:
     void tryLoseFirm(int pl, int fNu);
     void tryLoseMon(int pl, int fNu);
     void tryMove(int pl, int fNu);
+    void tryChoose(int pl, int r, int c);
     void tryPBP(int pl);
+    void tryQuestion(int pl, QPair<quint8,quint8> pair, bool choose = false);
+    void droppedQuestion(int pl, QPair<quint8,quint8> pair);
     void replayDir(int dir);
     void replayStay(int dir);
     void replayCubik(int rnd);
     void endOfTurn(int pNu);
-    void droppedQuestion(int pl, QPair<quint8,quint8> pair);
 private slots:
     void toLog(QString str);  // временно
 };

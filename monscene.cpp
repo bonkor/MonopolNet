@@ -212,12 +212,15 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
 
     qPane = new CQPane(main, Qt::FramelessWindowHint);
 //    qPane->hide();
-    qPane->setToChooseMode();
+//    qPane->setToChooseMode();
+    qPane->setToPBMode();
 
     fPane = new CFirmsPane(main, Qt::FramelessWindowHint);
     fPane->init(doc);
     fPane->hide();
 
+    QObject::connect(qPane, SIGNAL(choose(int,int)),
+                     this, SLOT(choose(int,int)));
     QObject::connect(fPane, SIGNAL(viewFirm(int)),
                      this, SLOT(showFirm(int)));
     QObject::connect(fvp, SIGNAL(showMonPane()),
@@ -858,6 +861,14 @@ void MonScene::askQuestion(int pl)
     askCubik(pl);
 }
 
+void MonScene::askQuestionPB(int pl)
+{
+    if (pl != scenePlayer)
+        return;
+
+    addToLog(tr("Отказываетесь от результата?"));
+}
+
 void MonScene::askMoveToPireferic(int player)
 {
     if (player != scenePlayer)
@@ -903,6 +914,8 @@ void MonScene::askChoose(int pl)
         return;
 
     addToLog(tr("Выберите любой из ответов"));
+    qPane->setToChooseMode();
+    qPane->show();
 }
 
 #define HZ_SHIFT 2
@@ -1124,6 +1137,11 @@ void MonScene::PBPPressed(void)
 void MonScene::showMonPane(void)
 {
     fPane->show();
+}
+
+void MonScene::choose(int r, int c)
+{
+    emit choosed(scenePlayer, r, c);
 }
 
 void MonScene::enaEndOfTurn(int pl)

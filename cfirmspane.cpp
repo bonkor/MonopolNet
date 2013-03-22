@@ -1,3 +1,4 @@
+#include <QApplication>
 #include <QPainter>
 #include "cfirmspane.h"
 
@@ -67,10 +68,20 @@ void CFLabel::leaveEvent(QEvent *event)
     setPalette(pal);
 }
 
+void CFLabel::mousePressEvent(QMouseEvent * event)
+{
+    if (event->button() == Qt::LeftButton) {
+        mousePressPoint = event->globalPos();
+    }
+    QWidget::mousePressEvent(event);
+}
+
 void CFLabel::mouseReleaseEvent(QMouseEvent * event)
 {
     if (event->button() == Qt::LeftButton) {
-        emit labClick(fNu);
+        QPoint p = event->globalPos() - mousePressPoint;
+        if (p.manhattanLength() < QApplication::startDragDistance())
+            emit labClick(fNu);
     }
     QWidget::mouseReleaseEvent(event);
 }

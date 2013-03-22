@@ -6,7 +6,8 @@
 #include "cqpane.h"
 
 quint16 QPaneWidth  = 327;
-quint16 QPaneHeight = 231;
+quint16 QPaneMinHeight = 231;
+quint16 QPaneHeight = 261;
 
 #define FW 51
 #define FH 35
@@ -20,6 +21,14 @@ CQField::CQField(QWidget *parent, Qt::WindowFlags f, quint8 r, quint8 c) :
     row = r;
     col = c;
     setFixedSize(FW, FH);
+}
+
+bool CQField::test(quint8 r, quint8 c)
+{
+    if (r == row && c == col)
+        return true;
+    else
+        return false;
 }
 
 void CQField::setPict(QImage i)
@@ -48,7 +57,7 @@ void CQField::setToChooseMode(void)
 void CQField::enterEvent(QEvent *event)
 {
 //    qDebug() << tr("CQField::enterEvent");
-    if (mode == QP_CHOOSE) {
+    if (mode == QP_CHOOSE && ! test(6, 1)) {
         selected = true;
         update();
     }
@@ -57,7 +66,7 @@ void CQField::enterEvent(QEvent *event)
 void CQField::leaveEvent(QEvent *event)
 {
 //    qDebug() << tr("CQField::leaveEvent");
-    if (mode == QP_CHOOSE) {
+    if (mode == QP_CHOOSE && ! test(6, 1)) {
         selected = false;
         update();
     }
@@ -78,7 +87,7 @@ void CQField::paintEvent(QPaintEvent *event)
 
 void CQField::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && mode == QP_CHOOSE) {
+    if (event->button() == Qt::LeftButton && mode == QP_CHOOSE && ! test(6, 1)) {
         mousePressPoint = event->globalPos();
     }
     QWidget::mousePressEvent(event);
@@ -86,7 +95,7 @@ void CQField::mousePressEvent(QMouseEvent *event)
 
 void CQField::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && mode == QP_CHOOSE) {
+    if (event->button() == Qt::LeftButton && mode == QP_CHOOSE && ! test(6, 1)) {
         QPoint p = event->globalPos() - mousePressPoint;
         if (p.manhattanLength() < QApplication::startDragDistance())
             emit choose(row, col);
@@ -106,7 +115,7 @@ CQPane::CQPane(QWidget *parent, Qt::WindowFlags f) :
     CMoveWidget(parent, f)
 {
     mode = QP_ORD;
-    setFixedSize(QPaneWidth, QPaneHeight);
+    setFixedSize(QPaneWidth, QPaneMinHeight);
     move(50, 50);
     for (int i=0; i<6; i++)
         for (int j=0; j<6; j++) {
@@ -178,28 +187,62 @@ void CQPane::choosePriv(int r, int c)
 
 void CQPane::setToOrdinadyMode(void)
 {
+    setFixedSize(QPaneWidth, QPaneMinHeight);
+    reject->hide();
+    accept->hide();
+
     mode = QP_ORD;
     for (int i=0; i<6; i++)
         for (int j=0; j<6; j++)
             Field[i][j]->setToOrdinadyMode();
+    update();
 }
 
 void CQPane::setToChooseMode(void)
 {
+    setFixedSize(QPaneWidth, QPaneMinHeight);
+    reject->hide();
+    accept->hide();
+
     mode = QP_CHOOSE;
     for (int i=0; i<6; i++)
         for (int j=0; j<6; j++)
             Field[i][j]->setToChooseMode();
+    update();
+}
+
+void CQPane::setToPBMode(void)
+{
+    mode = QP_PB;
+    setFixedSize(QPaneWidth, QPaneHeight);
+    reject->show();
+    accept->show();
+    update();
+}
+
+void CQPane::acceptButton(void)
+{
+    if (mode == QP_PB)
+        emit qAccept(true);
+}
+
+void CQPane::rejectButton(void)
+{
+    if (mode == QP_PB)
+        emit qAccept(false);
 }
 
 void CQPane::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
     p.drawImage(0, 0, MainPict);
+
+    if (mode != QP_PB)
+        p.drawImage(0, QPaneMinHeight - 2, BottomPict);
 }
 
 void CQPane::preparePics(void){
-    QImage OriginalPicture = QImage("Q.bmp");
+    QImage OriginalPicture = QImage("Qp.bmp");
     MainPict = OriginalPicture.copy(QRect(0, 0, QPaneWidth, QPaneHeight));
     for (int i=0; i<6; i++)
         for (int j=0; j<6; j++) {
@@ -207,6 +250,27 @@ void CQPane::preparePics(void){
             Field[i][j]->move(8 + (FW + 1) * j, 8 + (FH + 1) * i);
             Field[i][j]->show();
         }
+
+    QImage rejectPict = OriginalPicture.copy(QRect(92, 231, 38, 19));
+    reject = new CPictButton(this);
+    reject->initButton(rejectPict, rejectPict, 43, 24);
+    reject->move(90, 229);
+    reject->hide();
+
+    QImage acceptPict = OriginalPicture.copy(QRect(197, 231, 38, 19));
+    accept = new CPictButton(this);
+    accept->initButton(acceptPict, acceptPict, 43, 24);
+    accept->move(195, 229);
+    accept->hide();
+
+    QObject::connect(reject, SIGNAL(clicked()), this, SLOT(rejectButton()));
+    QObject::connect(accept, SIGNAL(clicked()), this, SLOT(acceptButton()));
+
+    QPainter p(&MainPict);
+    p.fillRect(85, 226, 162, 30, QColor(192, 192, 192));
+    p.end();
+
+    BottomPict = OriginalPicture.copy(QRect(0, QPaneHeight - 2, QPaneWidth, 2));
 }
 
 void CQPane::clear(void)

@@ -62,6 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      scene, SLOT(askMoveBetween(int)));
     QObject::connect(ctrl, SIGNAL(askChoose(int)),
                      scene, SLOT(askChoose(int)));
+    QObject::connect(ctrl, SIGNAL(askQuestionPB(int)),
+                     scene, SLOT(askQuestionPB(int)));
 
     QObject::connect(scene, SIGNAL(pressedChangeFirm(int,int,int)),
                      ctrl, SLOT(tryChangeFirm(int,int,int)));
@@ -87,8 +89,10 @@ MainWindow::MainWindow(QWidget *parent) :
                      ctrl, SLOT(endOfTurn(int)));
     QObject::connect(scene, SIGNAL(pressedPBP(int)),
                      ctrl, SLOT(tryPBP(int)));
+    QObject::connect(scene, SIGNAL(choosed(int,int,int)),
+                     ctrl, SLOT(tryChoose(int,int,int)));
     QObject::connect(scene, SIGNAL(droppedQuestion(int,QPair<quint8,quint8>)),
-                     ctrl, SLOT(droppedQuestion(int,QPair<quint8,quint8>)));
+                     ctrl, SLOT(tryQuestion(int,QPair<quint8,quint8>)));
 
     ctrl->startGame();
 }

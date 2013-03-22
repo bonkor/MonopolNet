@@ -220,6 +220,21 @@ void CControl::tryMove(int pl, int fNu)
     }
 }
 
+void CControl::tryChoose(int pl, int r, int c)
+{
+    qDebug() << tr("CControl::tryChoose");
+    CPlayer *plp = &doc.m_p[pl];
+    if (plp->mustChoose) {
+        plp->mustChoose = false;
+        QPair<quint8,quint8> pair;
+        pair.first = r;
+        pair.second = c;
+        tryQuestion(pl, pair, true);
+    } else {
+        emit sendToLog(plp->name + tr(" не может выбрать"));
+    }
+}
+
 void CControl::toLog(QString str)
 {
     emit sendToLog(str);
@@ -269,7 +284,7 @@ void CControl::replayCubik(int rnd)
         movePlayer(rnd);
 }
 
-void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
+void CControl::tryQuestion(int pl, QPair<quint8,quint8> pair, bool choose)
 {
     qDebug() << pair.first << pair.second;
 
@@ -281,119 +296,230 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
 
     CPlayer *cplp = doc.getCurPlayer();
     QString name = cplp->name;
+
+    QString txt1;
+    if (choose)
+        txt1 = tr(" выбрал ");
+    else
+        txt1 = tr(" выбросил ");
+    emit sendToLog(name + txt1 + questionName(pair));
+
+    if (! choose && cplp->pbq > 0 && ! checkQuestionPositive(pair)) {
+        lastQuestion = pair;
+        emit askQuestionPB(pl);
+    } else
+        droppedQuestion(pl, pair);
+}
+
+bool CControl::checkQuestionPositive(QPair<quint8,quint8> pair)
+{
+    quint8 r = pair.first;
+    quint8 c = pair.second;
+
+    if (r == 1 && c == 1)
+        return true;
+    else if (r == 1 && c == 6)
+        return true;
+    else if (r == 1 && c == 6)
+        return true;
+    else if (r == 2 && c == 1)
+        return true;
+    else if (r == 2 && c == 2)
+        return true;
+    else if (r == 2 && c == 6)
+        return true;
+    else if (r == 3 && c == 1)
+        return true;
+    else if (r == 3 && c == 3)
+        return true;
+    else if (r == 4 && c == 4)
+        return true;
+    else if (r == 5 && c == 1)
+        return true;
+    else if (r == 5 && c == 4)
+        return true;
+    else if (r == 5 && c == 5)
+        return true;
+    else if (r == 6 && c == 1)
+        return true;
+    else if (r == 6 && c == 6)
+        return true;
+    else
+        return false;
+}
+
+QString CControl::questionName(QPair<quint8,quint8> pair)
+{
+    if (pair.first == 1 && pair.second == 1)
+        return tr("+10");
+    else if (pair.first == 1 && pair.second == 2)
+        return tr("-10");
+    else if (pair.first == 1 && pair.second == 3)
+        return tr("'Свернуть к старту'");
+    else if (pair.first == 1 && pair.second == 4)
+        return tr("'Такси'");
+    else if (pair.first == 1 && pair.second == 5)
+        return tr("'?'");
+    else if (pair.first == 1 && pair.second == 6)
+        return tr("'ПБ на ?'");
+    else if (pair.first == 2 && pair.second == 1)
+        return tr("'Купи'");
+    else if (pair.first == 2 && pair.second == 2)
+        return tr("+20");
+    else if (pair.first == 2 && pair.second == 3)
+        return tr("-20");
+    else if (pair.first == 2 && pair.second == 4)
+        return tr("'Встань между фишкой и стартом'");
+    else if (pair.first == 2 && pair.second == 5)
+        return tr("'Тюрьма'");
+    else if (pair.first == 2 && pair.second == 6)
+        return tr("'ПБ на платеж'");
+    else if (pair.first == 3 && pair.second == 1)
+        return tr("'Поставь мезон'");
+    else if (pair.first == 3 && pair.second == 2)
+        return tr("'Продай'");
+    else if (pair.first == 3 && pair.second == 3)
+        return tr("+30");
+    else if (pair.first == 3 && pair.second == 4)
+        return tr("-30");
+    else if (pair.first == 3 && pair.second == 5)
+        return tr("'Встань на любую из креста'");
+    else if (pair.first == 3 && pair.second == 6)
+        return tr("'Биржа'");
+    else if (pair.first == 4 && pair.second == 1)
+        return tr("'5 ходов вперед'");
+    else if (pair.first == 4 && pair.second == 2)
+        return tr("'Сними мезон'");
+    else if (pair.first == 4 && pair.second == 3)
+        return tr("'Потеряй'");
+    else if (pair.first == 4 && pair.second == 4)
+        return tr("+50");
+    else if (pair.first == 4 && pair.second == 5)
+        return tr("'Всем по 10'");
+    else if (pair.first == 4 && pair.second == 6)
+        return tr("'Встань на любую из перефирии'");
+    else if (pair.first == 5 && pair.second == 1)
+        return tr("'Дополнительные +25 при проходе через СТАРТ'");
+    else if (pair.first == 5 && pair.second == 2)
+        return tr("'???'");
+    else if (pair.first == 5 && pair.second == 3)
+        return tr("'Потеряй фирму из монополии'");
+    else if (pair.first == 5 && pair.second == 4)
+        return tr("'Все потеряли'");
+    else if (pair.first == 5 && pair.second == 5)
+        return tr("'От всех по 10'");
+    else if (pair.first == 5 && pair.second == 6)
+        return tr("'Всем по 15'");
+    else if (pair.first == 6 && pair.second == 1)
+        return tr("'Выбери среди вопросов'");
+    else if (pair.first == 6 && pair.second == 2)
+        return tr("'Не получать +25 при проходе через СТАРТ'");
+    else if (pair.first == 6 && pair.second == 3)
+        return tr("'5 ходов назад'");
+    else if (pair.first == 6 && pair.second == 4)
+        return tr("'5 ходов сервестра'");
+    else if (pair.first == 6 && pair.second == 5)
+        return tr("'Поменяй'");
+    else if (pair.first == 6 && pair.second == 6)
+        return tr("'От всех по 15'");
+
+    return tr("");
+}
+
+void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
+    {
+    if (pl != doc.curPl)
+        return;
+
+    CPlayer *cplp = doc.getCurPlayer();
+    QString name = cplp->name;
+
     if (pair.first == 1 && pair.second == 1) {
         // +10
-        emit sendToLog(name + tr(" выбросил +10"));
         doc.takeFromBank(pl, 10);
     } else if (pair.first == 1 && pair.second == 2) {
         // -10
-        emit sendToLog(name + tr(" выбросил -10"));
         doc.giveToBank(pl, 10);
     } else if (pair.first == 1 && pair.second == 3) {
         // свернуть к старту
-        emit sendToLog(name + tr(" выбросил 'Свернуть к старту'"));
         cplp->turnToStart++;
     } else if (pair.first == 1 && pair.second == 4) {
         // такси
-        emit sendToLog(name + tr(" выбросил 'Такси'"));
         doc.go(pl, 0, 10);
     } else if (pair.first == 1 && pair.second == 5) {
         // ?
-        emit sendToLog(name + tr(" выбросил '?'"));
         cplp->insertToQueue(Q_Ques);
     } else if (pair.first == 1 && pair.second == 6) {
         // ПБ на вопрошалку
-        emit sendToLog(name + tr(" выбросил 'ПБ на ?'"));
         cplp->pbq++;
     } else if (pair.first == 2 && pair.second == 1) {
         // buy
-        emit sendToLog(name + tr(" выбросил 'Купи'"));
         cplp->canBuy = true;
         cplp->investComplit = false;
     } else if (pair.first == 2 && pair.second == 2) {
         // +20
-        emit sendToLog(name + tr(" выбросил +20"));
         doc.takeFromBank(pl, 20);
     } else if (pair.first == 2 && pair.second == 3) {
         // -20
-        emit sendToLog(name + tr(" выбросил -20"));
         doc.giveToBank(pl, 20);
     } else if (pair.first == 2 && pair.second == 4) {
         // между фишкой и стартом
-        emit sendToLog(name + tr(" выбросил 'Встань между фишкой и стартом'"));
         cplp->insertToQueue(Q_Move_Between);
     } else if (pair.first == 2 && pair.second == 5) {
         // тюрьма
-        emit sendToLog(name + tr(" выбросил 'Тюрьма'"));
         doc.go(pl, 0, 30);
     } else if (pair.first == 2 && pair.second == 6) {
         // ПБ на оплату
-        emit sendToLog(name + tr(" выбросил 'ПБ на платеж'"));
         cplp->pbp += 3;
     } else if (pair.first == 3 && pair.second == 1) {
         // buy
-        emit sendToLog(name + tr(" выбросил 'Поставь мезон'"));
         cplp->canInvest = true;
         cplp->investComplit = false;
     } else if (pair.first == 3 && pair.second == 2) {
         // sell
-        emit sendToLog(name + tr(" выбросил 'Продай'"));
         cplp->insertToQueue(Q_Sell);
     } else if (pair.first == 3 && pair.second == 3) {
         // +30
-        emit sendToLog(name + tr(" выбросил +30"));
         doc.takeFromBank(pl, 30);
     } else if (pair.first == 3 && pair.second == 4) {
         // -30
-        emit sendToLog(name + tr(" выбросил -30"));
         doc.giveToBank(pl, 30);
     } else if (pair.first == 3 && pair.second == 5) {
         // на крест
-        emit sendToLog(name + tr(" выбросил 'Встань на любую из креста'"));
         cplp->insertToQueue(Q_Move_Crest);
     } else if (pair.first == 3 && pair.second == 6) {
         // биржа
-        emit sendToLog(name + tr(" выбросил 'Биржа'"));
         doc.go(pl, 0, 20);
     } else if (pair.first == 4 && pair.second == 1) {
         // 5 вперед
-        emit sendToLog(name + tr(" выбросил '5 ходов вперед'"));
         cplp->addMove(5);
     } else if (pair.first == 4 && pair.second == 2) {
         // -*
-        emit sendToLog(name + tr(" выбросил 'Сними мезон'"));
         cplp->insertToQueue(Q_LoseMez);
     } else if (pair.first == 4 && pair.second == 3) {
         // lose
-        emit sendToLog(name + tr(" выбросил 'Потеряй'"));
         cplp->insertToQueue(Q_Lose);
     } else if (pair.first == 4 && pair.second == 4) {
         // +50
-        emit sendToLog(name + tr(" выбросил +50"));
         doc.takeFromBank(pl, 50);
     } else if (pair.first == 4 && pair.second == 5) {
         // всем по 10
-        emit sendToLog(name + tr(" выбросил 'Всем по 10'"));
         doc.transferMoneyToAll(pl, 10);
     } else if (pair.first == 4 && pair.second == 6) {
         // на перефирию
-        emit sendToLog(name + tr(" выбросил 'Встань на любую из перефирии'"));
         cplp->insertToQueue(Q_Move_Perefiric);
     } else if (pair.first == 5 && pair.second == 1) {
         // +st
-        emit sendToLog(name + tr(" выбросил 'Дополнительные +25 при проходе через СТАРТ'"));
         cplp->plusStart++;
     } else if (pair.first == 5 && pair.second == 2) {
         // 3?
-        emit sendToLog(name + tr(" выбросил '???'"));
+        doc.go(pl, 0, 0);
         cplp->insertToQueue(Q_Ques, 3);
     } else if (pair.first == 5 && pair.second == 3) {
         // loseMon
-        emit sendToLog(name + tr(" выбросил 'Потеряй фирму из монополии'"));
         cplp->insertToQueue(Q_LoseMon);
     } else if (pair.first == 5 && pair.second == 4) {
         // lose
-        emit sendToLog(name + tr(" выбросил 'Все потеряли'"));
         for (quint8 i=0; i<doc.nu_Players; i++) {
             CPlayer *p = &doc.m_p[i];
             if (i != pl && p->active)
@@ -401,7 +527,6 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         }
     } else if (pair.first == 5 && pair.second == 5) {
         // от всех по 10
-        emit sendToLog(name + tr(" выбросил 'От всех по 10'"));
         for (quint8 i=0; i<doc.nu_Players; i++) {
             CPlayer *p = &doc.m_p[i];
             if (i != pl && p->active)
@@ -409,31 +534,24 @@ void CControl::droppedQuestion(int pl, QPair<quint8,quint8> pair)
         }
     } else if (pair.first == 5 && pair.second == 6) {
         // всем по 15
-        emit sendToLog(name + tr(" выбросил 'Всем по 15'"));
         doc.transferMoneyToAll(pl, 15);
     } else if (pair.first == 6 && pair.second == 1) {
         // choose
-        emit sendToLog(name + tr(" выбросил 'Выбери среди вопросов'"));
         cplp->insertToQueue(Q_Choose);
     } else if (pair.first == 6 && pair.second == 2) {
         // -st
-        emit sendToLog(name + tr(" выбросил 'Не получать +25 при проходе через СТАРТ'"));
         cplp->plusStart--;
     } else if (pair.first == 6 && pair.second == 3) {
         // 5 назад
-        emit sendToLog(name + tr(" выбросил '5 ходов назад'"));
         cplp->addMove(-5);
     } else if (pair.first == 6 && pair.second == 4) {
         // seq
-        emit sendToLog(name + tr(" выбросил '5 ходов сервестра'"));
         cplp->seq += 5;
     } else if (pair.first == 6 && pair.second == 5) {
         // change
-        emit sendToLog(name + tr(" выбросил 'Поменяй'"));
         cplp->insertToQueue(Q_Change);
     } else if (pair.first == 6 && pair.second == 6) {
         // от всех по 15
-        emit sendToLog(name + tr(" выбросил 'От всех по 15'"));
         for (quint8 i=0; i<doc.nu_Players; i++) {
             CPlayer *p = &doc.m_p[i];
             if (i != pl && p->active)

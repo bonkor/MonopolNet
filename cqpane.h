@@ -5,10 +5,12 @@
 #include <QImage>
 #include <QMouseEvent>
 #include "cmovewidget.h"
+#include "cpictbutton.h"
 
 enum {
     QP_ORD,     // обычная мода
-    QP_CHOOSE   // выбор ответа
+    QP_CHOOSE,  // выбор ответа
+    QP_PB       // ответ на ПБшку
 };
 
 class CQField : public QWidget
@@ -37,6 +39,7 @@ private:
     QPoint mousePressPoint;
 
     QImage makeTranparant(QImage src);
+    bool test(quint8 r, quint8 c);
 signals:
     void choose(int r, int c);
 public slots:
@@ -53,12 +56,16 @@ public:
     void selectPos(quint8 r, quint8 c);
     void setToOrdinadyMode(void);
     void setToChooseMode(void);
+    void setToPBMode(void);
     ~CQPane();
 protected:
     void paintEvent(QPaintEvent *event);
 private:
     QImage MainPict;
+    QImage BottomPict;
     CQField *Field[6][6];
+    CPictButton *reject;
+    CPictButton *accept;
     quint8 row;
     quint8 col;
     quint8 mode;
@@ -67,9 +74,12 @@ private:
 
 signals:
     void choose(int r, int c);
+    void qAccept(bool res);
 
 private slots:
     void choosePriv(int r, int c);
+    void acceptButton(void);
+    void rejectButton(void);
 
 public slots:
     

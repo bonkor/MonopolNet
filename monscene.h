@@ -88,6 +88,7 @@ signals:
     void pressedLoseMezon(int pl, int fNu);
     void pressedBuyFirm(int pl, int fNu, int flNu);
     void pressedSellFirm(int pl, int fNu);
+    void choosed(int pl, int r, int c);
     void replayDir(int dir);
     void replayStay(int dir);
     void replayCubik(int rnd);
@@ -115,6 +116,7 @@ public slots:
     void askChoose(int pl);
     void askSellSomething(int pl);
     void askQuestion(int pl);
+    void askQuestionPB(int pl);
     void askMoveToPireferic(int player);
     void askMoveToCrest(int player);
     void askMoveBetween(int player);
@@ -138,6 +140,7 @@ private slots:
     void EOMPressed(void);
     void PBPPressed(void);
     void showMonPane(void);
+    void choose(int r, int c);
 };
 
 #endif // MONSCENE_H
