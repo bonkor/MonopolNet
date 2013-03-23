@@ -119,10 +119,10 @@ void CControl::trySellFirm(int pl, int fNu)
     doc.clearLastPay(pl);
     bool res;
     if (res = doc.sellFirm(pl, fNu)) {
-        emit sendToLog(doc.m_p[pl].name + tr(" продает ") + doc.m_f[fNu].name);
+//        emit sendToLog(doc.m_p[pl].name + tr(" продает ") + doc.m_f[fNu].name);
         emit docFirmChanged(fNu);
-    } else {
-        emit sendToLog(doc.m_p[pl].name + tr(" не удается продать ") + doc.m_f[fNu].name);
+//    } else {
+//        emit sendToLog(doc.m_p[pl].name + tr(" не удается продать ") + doc.m_f[fNu].name);
     }
     if (plp->mustSellMode && plp->money.positive()) {
         qDebug() << pl << "-" << plp->money.toString();

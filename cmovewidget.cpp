@@ -40,3 +40,17 @@ void CMoveWidget::mouseMoveEvent(QMouseEvent *mouseEvent)
 
     QWidget::mouseMoveEvent(mouseEvent);
 }
+
+void CMoveWidget::checkWidgetFitted(void)
+{
+    QPoint r = this->pos();
+
+    int maxW = this->parentWidget()->geometry().width() - this->geometry().width();
+    int maxH = this->parentWidget()->geometry().height() - this->geometry().height();
+    if (r.rx() > maxW)
+        r.setX(maxW);
+    if (r.ry() > maxH)
+        r.setY(maxH);
+
+    move(r);
+}

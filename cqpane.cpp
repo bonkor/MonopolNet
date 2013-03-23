@@ -174,6 +174,8 @@ CQPane::~CQPane()
     for (int i=0; i<6; i++)
         for (int j=0; j<6; j++)
             delete Field[i][j];
+    delete accept;
+    delete reject;
 }
 
 void CQPane::choosePriv(int r, int c)
@@ -215,6 +217,7 @@ void CQPane::setToPBMode(void)
 {
     mode = QP_PB;
     setFixedSize(QPaneWidth, QPaneHeight);
+    checkWidgetFitted();
     reject->show();
     accept->show();
     update();

@@ -8,6 +8,7 @@ class CMoveWidget : public QWidget
     Q_OBJECT
 public:
     explicit CMoveWidget(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    void checkWidgetFitted(void);
 
 protected:
     virtual void mousePressEvent(QMouseEvent * mouseEvent);

@@ -252,7 +252,6 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
 
 MonScene::~MonScene()
 {
-    delete doc;
     delete fvp;
     delete qPane;
     delete fPane;

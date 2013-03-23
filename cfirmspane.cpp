@@ -93,7 +93,7 @@ CFirmsPane::CFirmsPane(QWidget *parent, Qt::WindowFlags f) :
 
     move(50, 50);
 
-    QGridLayout *mainLayout = new QGridLayout(this);
+    mainLayout = new QGridLayout(this);
     mainLayout->setMargin(11);
     mainLayout->setSpacing(6);
 
@@ -113,6 +113,9 @@ CFirmsPane::CFirmsPane(QWidget *parent, Qt::WindowFlags f) :
 
 CFirmsPane::~CFirmsPane()
 {
+    for (int i=0; i<17; i++) {
+        vL[i].setParent(0);
+    }
     delete mainLayout;
 }
 

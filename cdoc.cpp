@@ -2,7 +2,7 @@
 
 CDoc::CDoc(QObject *parent)
 {
-    nu_Players = 4;
+    nu_Players = 2;
     curPl = 0;
 
     nu_Monopols = 28;
@@ -1525,8 +1525,8 @@ void CDoc::FillFields()
     m_f[34].mz[1].income = 8;
     m_f[34].mz[2].invest = 25;
     m_f[34].mz[2].income = 14;
-    m_f[34].mz[3].invest = 30;
-    m_f[34].mz[3].income = 35;
+    m_f[34].mz[3].invest = 40;
+    m_f[34].mz[3].income = 45;
 
     m_f[35].name = tr("Genoa");
     m_f[35].m_pict = P_POR;
