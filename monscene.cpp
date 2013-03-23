@@ -211,9 +211,9 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
     fvp->hide();
 
     qPane = new CQPane(main, Qt::FramelessWindowHint);
-//    qPane->hide();
+    qPane->hide();
 //    qPane->setToChooseMode();
-    qPane->setToPBMode();
+//    qPane->setToPBMode();
 
     fPane = new CFirmsPane(main, Qt::FramelessWindowHint);
     fPane->init(doc);
@@ -221,6 +221,8 @@ void MonScene::init(QGraphicsView *main, CDoc *d)
 
     QObject::connect(qPane, SIGNAL(choose(int,int)),
                      this, SLOT(choose(int,int)));
+    QObject::connect(qPane, SIGNAL(qAccept(bool)),
+                     this, SLOT(qAccept(bool)));
     QObject::connect(fPane, SIGNAL(viewFirm(int)),
                      this, SLOT(showFirm(int)));
     QObject::connect(fvp, SIGNAL(showMonPane()),
@@ -867,6 +869,8 @@ void MonScene::askQuestionPB(int pl)
         return;
 
     addToLog(tr("Отказываетесь от результата?"));
+    qPane->setToPBMode();
+    qPane->show();
 }
 
 void MonScene::askMoveToPireferic(int player)
@@ -1132,6 +1136,11 @@ void MonScene::PBPPressed(void)
 {
     pbp->hide();
     emit pressedPBP(scenePlayer);
+}
+
+void MonScene::qAccept(bool res)
+{
+    emit acceptedQuestion(scenePlayer, res);
 }
 
 void MonScene::showMonPane(void)

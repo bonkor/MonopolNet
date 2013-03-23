@@ -63,6 +63,7 @@ public slots:
     void tryPBP(int pl);
     void tryQuestion(int pl, QPair<quint8,quint8> pair, bool choose = false);
     void droppedQuestion(int pl, QPair<quint8,quint8> pair);
+    void tryQuestionAccept(int pl, bool res);
     void replayDir(int dir);
     void replayStay(int dir);
     void replayCubik(int rnd);

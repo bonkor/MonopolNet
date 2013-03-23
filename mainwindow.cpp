@@ -93,6 +93,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      ctrl, SLOT(tryChoose(int,int,int)));
     QObject::connect(scene, SIGNAL(droppedQuestion(int,QPair<quint8,quint8>)),
                      ctrl, SLOT(tryQuestion(int,QPair<quint8,quint8>)));
+    QObject::connect(scene, SIGNAL(acceptedQuestion(int,bool)),
+                     ctrl, SLOT(tryQuestionAccept(int,bool)));
 
     ctrl->startGame();
 }

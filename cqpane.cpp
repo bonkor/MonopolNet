@@ -222,14 +222,26 @@ void CQPane::setToPBMode(void)
 
 void CQPane::acceptButton(void)
 {
-    if (mode == QP_PB)
+    if (mode == QP_PB) {
+        setFixedSize(QPaneWidth, QPaneMinHeight);
+        reject->hide();
+        accept->hide();
+
+        mode = QP_ORD;
         emit qAccept(true);
+    }
 }
 
 void CQPane::rejectButton(void)
 {
-    if (mode == QP_PB)
+    if (mode == QP_PB) {
+        setFixedSize(QPaneWidth, QPaneMinHeight);
+        reject->hide();
+        accept->hide();
+
+        mode = QP_ORD;
         emit qAccept(false);
+    }
 }
 
 void CQPane::paintEvent(QPaintEvent *event)

@@ -235,6 +235,25 @@ void CControl::tryChoose(int pl, int r, int c)
     }
 }
 
+void CControl::tryQuestionAccept(int pl, bool res)
+{
+    qDebug() << tr("CControl::tryQuestionAccept");
+    CPlayer *plp = &doc.m_p[pl];
+    if (plp->mustAcceptQues) {
+        plp->mustAcceptQues = false;
+        if (res)
+            droppedQuestion(pl, lastQuestion);
+        else {
+            plp->pbq--;
+            emit docInfoChanged();
+            emit sendToLog(plp->name + tr(" отказывается от вопроса ") + questionName(lastQuestion));
+            startMove();
+        }
+    } else {
+        emit sendToLog(plp->name + tr(" не может согласиться с вопросом. ОШИБКА"));
+    }
+}
+
 void CControl::toLog(QString str)
 {
     emit sendToLog(str);
@@ -288,7 +307,7 @@ void CControl::tryQuestion(int pl, QPair<quint8,quint8> pair, bool choose)
 {
     qDebug() << pair.first << pair.second;
 
-    pair.first = 6; pair.second = 1;
+//    pair.first = 6; pair.second = 1;
 //    pair.first = 4; pair.second = 1;
 
     if (pl != doc.curPl)
@@ -306,6 +325,7 @@ void CControl::tryQuestion(int pl, QPair<quint8,quint8> pair, bool choose)
 
     if (! choose && cplp->pbq > 0 && ! checkQuestionPositive(pair)) {
         lastQuestion = pair;
+        cplp->mustAcceptQues = true;
         emit askQuestionPB(pl);
     } else
         droppedQuestion(pl, pair);

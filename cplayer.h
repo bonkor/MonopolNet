@@ -59,6 +59,7 @@ public:
     bool mustLoseQues;  // должен что то потерять после вопроса
     bool mustLoseMonQues;  // должен потерять монополию после вопроса
     bool mustChangeQues;// должен поменять фирму после вопроса
+    bool mustAcceptQues;// должен решить использовать ли ПБшку после вопроса
     bool mustLoseMeson; // должен снять мезон после вопроса
     bool mustGoPireferic; // должен перейти на перефирию
     bool mustGoCrest;   // должен перейти на крест

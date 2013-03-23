@@ -95,6 +95,7 @@ signals:
     void pressedEndOfTurn(int pl);
     void pressedPBP(int pl);
     void droppedQuestion(int pl, QPair<quint8,quint8>);
+    void acceptedQuestion(int pl, bool res);
     void movedToPole(int pl, int flNu);
 public slots:
     void updateAll(void);
@@ -141,6 +142,7 @@ private slots:
     void PBPPressed(void);
     void showMonPane(void);
     void choose(int r, int c);
+    void qAccept(bool res);
 };
 
 #endif // MONSCENE_H
