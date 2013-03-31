@@ -12,6 +12,20 @@ MainWindow::MainWindow(QWidget *parent) :
     scene->setSceneRect(0,0,780,530);
 //    scene->setSceneRect(0,0,791,541);
     ui->graphicsView->setScene(scene);
+}
+
+MainWindow::~MainWindow()
+{
+    delete scene;
+    delete ctrl;
+    delete ui;
+}
+
+void MainWindow::setGameOpt(CGameOpt go)
+{
+    scene->setGameOpt(go);
+    ctrl->setGameOpt(go);
+
     scene->init(ui->graphicsView, ctrl->getDoc());
 
     QObject::connect(ctrl, SIGNAL(changeScenePlayer(int)),
@@ -97,11 +111,4 @@ MainWindow::MainWindow(QWidget *parent) :
                      ctrl, SLOT(tryQuestionAccept(int,bool)));
 
     ctrl->startGame();
-}
-
-MainWindow::~MainWindow()
-{
-    delete scene;
-    delete ctrl;
-    delete ui;
 }

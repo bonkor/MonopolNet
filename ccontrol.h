@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "cdoc.h"
+#include "cgameopt.h"
 
 class CControl : public QObject
 {
@@ -10,6 +11,7 @@ class CControl : public QObject
 public:
     explicit CControl(QObject *parent = 0);
     CDoc *getDoc(void);
+    void setGameOpt(CGameOpt go);
 
 private:
     CDoc doc;

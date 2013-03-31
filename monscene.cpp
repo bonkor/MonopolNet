@@ -83,6 +83,13 @@ MonScene::MonScene(QObject *parent) :
     lastCI = -1;
 }
 
+void MonScene::setGameOpt(CGameOpt go)
+{
+    qDebug() << tr("pl") << go.plNum;
+    for (quint8 i=0; i<go.plNum; i++)
+        PlColor[i] = go.po[i].color;
+}
+
 void MonScene::init(QGraphicsView *main, CDoc *d)
 {
     mainW = main;
@@ -267,6 +274,43 @@ MonScene::~MonScene()
     delete cbp;
 }
 
+QColor MonScene::makeLighterColor(QColor bc)
+{
+    return bc.lighter();
+}
+
+QColor MonScene::makeDarkerColor(QColor bc)
+{
+    return bc.darker();
+}
+
+QImage MonScene::makeNewColoredImage(QImage bi, QColor bc)
+{
+    QImage baseColorMask = bi;
+    QImage mask = bi.createMaskFromColor(0xffff0000, Qt::MaskInColor);
+    baseColorMask.fill(bc);
+    baseColorMask.setAlphaChannel(mask);
+
+    QImage lightColorMask = bi;
+    mask = bi.createMaskFromColor(0xffffaaaa, Qt::MaskInColor);
+    lightColorMask.fill(makeLighterColor(bc));
+    lightColorMask.setAlphaChannel(mask);
+
+    QImage darkColorMask = bi;
+    mask = bi.createMaskFromColor(0xff800000, Qt::MaskInColor);
+    darkColorMask.fill(makeDarkerColor(bc));
+    darkColorMask.setAlphaChannel(mask);
+
+    QImage i = bi;
+    QPainter p(&i);
+    p.drawImage(0, 0, baseColorMask, 0, 0, -1, -1, Qt::ColorOnly);
+    p.drawImage(0, 0, lightColorMask, 0, 0, -1, -1, Qt::ColorOnly);
+    p.drawImage(0, 0, darkColorMask, 0, 0, -1, -1, Qt::ColorOnly);
+    p.end();
+
+    return i;
+}
+
 void MonScene::preparePics(void){
     QImage OriginalPicture = QImage("Main.bmp");
     for (int i=0; i<8; i++) {
@@ -291,35 +335,45 @@ void MonScene::preparePics(void){
     for (int i=0; i<2; i++) {
         ResPct[i] = makeTranparant(OriginalPicture.copy(QRect(313, 305 - (i * (20 + 1)), 20, 20)));
     }
+    QImage tmpPic = makeTranparant(OriginalPicture.copy(QRect(397, 300, HArr_W, HArr_H)));
     for (int i=0; i<4; i++) {
-        RightPict[i] = makeTranparant(OriginalPicture.copy(QRect(397, 300 - (i * (HArr_H + 1)), HArr_W, HArr_H)));
+        RightPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(397, 196, HArr_W, HArr_H)));
     for (int i=0; i<4; i++) {
-        P_RightPict[i] = makeTranparant(OriginalPicture.copy(QRect(397, 196 - (i * (HArr_H + 1)), HArr_W, HArr_H)));
+        P_RightPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(435, 300, HArr_W, HArr_H)));
     for (int i=0; i<4; i++) {
-        LeftPict[i] = makeTranparant(OriginalPicture.copy(QRect(435, 300 - (i * (HArr_H + 1)), HArr_W, HArr_H)));
+        LeftPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(435, 196, HArr_W, HArr_H)));
     for (int i=0; i<4; i++) {
-        P_LeftPict[i] = makeTranparant(OriginalPicture.copy(QRect(435, 196 - (i * (HArr_H + 1)), HArr_W, HArr_H)));
+        P_LeftPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(473, 294, VArr_W, VArr_H)));
     for (int i=0; i<4; i++) {
-        DownPict[i] = makeTranparant(OriginalPicture.copy(QRect(473, 294 - (i * (VArr_H + 1)), VArr_W, VArr_H)));
+        DownPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(473, 166, VArr_W, VArr_H)));
     for (int i=0; i<4; i++) {
-        P_DownPict[i] = makeTranparant(OriginalPicture.copy(QRect(473, 166 - (i * (VArr_H + 1)), VArr_W, VArr_H)));
+        P_DownPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(501, 294, VArr_W, VArr_H)));
     for (int i=0; i<4; i++) {
-        UpPict[i] = makeTranparant(OriginalPicture.copy(QRect(501, 294 - (i * (VArr_H + 1)), VArr_W, VArr_H)));
+        UpPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(501, 166, VArr_W, VArr_H)));
     for (int i=0; i<4; i++) {
-        P_UpPict[i] = makeTranparant(OriginalPicture.copy(QRect(501, 166 - (i * (VArr_H + 1)), VArr_W, VArr_H)));
+        P_UpPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(529, 304, Center_W, Center_H)));
     for (int i=0; i<4; i++) {
-        CenterPict[i] = makeTranparant(OriginalPicture.copy(QRect(529, 304 - (i * (Center_H + 1)), Center_W, Center_H)));
+        CenterPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
+    tmpPic = makeTranparant(OriginalPicture.copy(QRect(529, 216, Center_W, Center_H)));
     for (int i=0; i<4; i++) {
-        P_CenterPict[i] = makeTranparant(OriginalPicture.copy(QRect(529, 216 - (i * (Center_H + 1)), Center_W, Center_H)));
+        P_CenterPict[i] = makeNewColoredImage(tmpPic, PlColor[i]);
     }
 }
 

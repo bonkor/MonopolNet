@@ -25,7 +25,9 @@ SOURCES += main.cpp\
     cmoney.cpp \
     cqpane.cpp \
     cfirmspane.cpp \
-    cmovewidget.cpp
+    cmovewidget.cpp \
+    cstartdialog.cpp \
+    cstartoptionsdialog.cpp
 
 HEADERS  += mainwindow.h \
     pole.h \
@@ -39,6 +41,11 @@ HEADERS  += mainwindow.h \
     cmoney.h \
     cqpane.h \
     cfirmspane.h \
-    cmovewidget.h
+    cmovewidget.h \
+    cstartdialog.h \
+    cstartoptionsdialog.h \
+    cgameopt.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    cstartdialog.ui \
+    cstartoptionsdialog.ui

@@ -15,6 +15,7 @@
 #include "ccubik.h"
 #include "cqpane.h"
 #include "cfirmspane.h"
+#include "cgameopt.h"
 
 enum {
     MCM_NO,             // обычный режим
@@ -30,6 +31,7 @@ public:
     explicit MonScene(QObject *parent = 0);
     ~MonScene();
     void init(QGraphicsView *main, CDoc *d);
+    void setGameOpt(CGameOpt go);
 private:
     QGraphicsView *mainW;
     CDoc *doc;
@@ -75,6 +77,9 @@ private:
     void clearDirBut(quint8 exept);
     void hideEndMode(void);
     bool isValidForMoving(quint8 pos);
+    QColor makeLighterColor(QColor bc);
+    QColor makeDarkerColor(QColor bc);
+    QImage makeNewColoredImage(QImage bi, QColor bc);
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);

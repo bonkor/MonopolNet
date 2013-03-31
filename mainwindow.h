@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "ccontrol.h"
 #include "monscene.h"
+#include "cgameopt.h"
 
 namespace Ui {
 class MainWindow;
@@ -16,6 +17,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void setGameOpt(CGameOpt go);
     
 private:
     Ui::MainWindow *ui;

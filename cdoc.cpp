@@ -2,7 +2,7 @@
 
 CDoc::CDoc(QObject *parent)
 {
-    nu_Players = 2;
+    nu_Players = 4;
     curPl = 0;
 
     nu_Monopols = 28;

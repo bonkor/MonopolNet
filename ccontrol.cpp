@@ -8,6 +8,13 @@ CControl::CControl(QObject *parent) :
                      this, SLOT(toLog(QString)));
 }
 
+void CControl::setGameOpt(CGameOpt go)
+{
+    doc.nu_Players = go.plNum;
+    for (quint8 i=0; i<go.plNum; i++)
+        doc.m_p[i].name = go.po[i].name;
+}
+
 CDoc *CControl::getDoc(void)
 {
     return &doc;

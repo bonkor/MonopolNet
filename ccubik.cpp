@@ -6,15 +6,15 @@ CCubik::CCubik(QWidget *parent) :
 {
     QObject::connect(this, SIGNAL(clicked()),
                      this, SLOT(makeRandom()));
-}
 
-void CCubik::makeRandom(void)
-{
     // Create seed for the random
     // That is needed only once on application startup
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
+}
 
+void CCubik::makeRandom(void)
+{
     int randomValue = randInt(1,6);
     QString tmpStr;
     tmpStr.setNum(randomValue);
